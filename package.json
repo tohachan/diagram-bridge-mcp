@@ -1,0 +1,29 @@
+{
+  "name": "diagram-bridge-mcp",
+  "version": "1.0.0",
+  "description": "A \"bridge\" MCP server with a unique Prompt+Tool design that helps LLMs seamlessly generate and render diagrams. Powered by Kroki to support dozens of formats.",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.0",
+    "flowmcp": "^2.1.1",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "mcp",
+    "diagram"
+  ],
+  "homepage": "https://github.com/tohachan/diagram-bridge-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/tohachan/diagram-bridge-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tohachan/diagram-bridge-mcp.git"
+  },
+  "license": "MIT",
+  "author": "Anton An",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

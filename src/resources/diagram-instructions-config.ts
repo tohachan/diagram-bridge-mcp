@@ -162,36 +162,41 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
       'Connect objects with arrows: A -> B',
       'Add labels with quotes: A -> B: "connection label"',
       'Use {} for nested structures and styling',
-      'Define shapes: A.shape: circle, square, diamond',
-      'Add styles: A.style.fill: blue',
+      'Define shapes: A.shape: rectangle, circle, diamond, cloud, text, cylinder, person',
+      'Add styles with hex colors: A.style.fill: "#3B82F6"',
+      'For titles, create objects: title: "My Title" { style.font-size: 20 }',
       'Comments start with #'
     ],
     bestPractices: [
       'Use hierarchical naming for complex systems',
-      'Group related components logically',
-      'Apply consistent styling themes',
+      'Group related components with container objects',
+      'Apply consistent hex color styling themes',
       'Use meaningful connection labels',
       'Leverage D2\'s automatic layout capabilities',
-      'Keep object names descriptive but concise'
+      'Keep object names descriptive but concise',
+      'Create title objects instead of using title: syntax'
     ],
     commonPitfalls: [
       'DO NOT use spaces in object names without quotes',
+      'DO NOT use CSS color names - use hex colors like "#FF5733"',
+      'DO NOT use title: syntax - create title objects instead',
+      'DO NOT use shape names like "square" or "package" - use valid D2 shapes',
       'DO NOT create overly deep nesting',
       'DO NOT mix arrow styles inconsistently',
-      'DO NOT overuse styling - focus on content first',
-      'DO NOT ignore D2\'s layout suggestions',
-      'DO NOT use invalid shape names'
+      'DO NOT use invalid shape names like "square" (use "rectangle")'
     ],
     examplePatterns: [
-      'frontend -> backend: "API calls"\nbackend -> database: "queries"\ndatabase.shape: cylinder',
-      'users: {\n  shape: person\n}\nusers -> system: "interact"\nsystem.style.fill: lightblue',
-      'network: {\n  router -> switch\n  switch -> servers\n}'
+      'frontend -> backend: "API calls"\nbackend -> database: "queries"\ndatabase.shape: cylinder\ndatabase.style.fill: "#E5E7EB"',
+      'title: "System Overview" {\n  style.font-size: 20\n}\nusers.shape: person\nusers -> system: "interact"\nsystem.style.fill: "#3B82F6"',
+      'network: {\n  router -> switch\n  switch -> servers\n  style.fill: "#F3F4F6"\n}\nservers.shape: rectangle'
     ],
     outputSpecifications: [
       'Output ONLY the D2 code without markdown wrapper',
       'Use clean, declarative syntax',
       'Define all objects before referencing them',
-      'Apply styles consistently',
+      'Use only hex colors for styling (e.g., "#FF5733", not "red")',
+      'Use valid D2 shape names only',
+      'Create title objects instead of using title: syntax',
       'Ensure proper nesting structure'
     ]
   },

@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Diagram Bridge MCP Server (Development)
+  diagram-bridge-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development
+    container_name: diagram-bridge-mcp-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - KROKI_URL=${KROKI_URL:-https://kroki.io}  # Use public Kroki by default
+      - LOG_LEVEL=debug
+    volumes:
+      # Mount source code for development
+      - ./src:/app/src:ro
+      - ./package.json:/app/package.json:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+    networks:
+      - diagram-network-dev
+    command: ["npm", "run", "dev"]
+
+  # Optional: Local Kroki for development (minimal setup)
+  kroki-dev:
+    image: yuzutech/kroki:latest
+    container_name: kroki-dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - KROKI_SAFE_MODE=unsafe  # Allow more diagram types in dev
+    networks:
+      - diagram-network-dev
+    profiles:
+      - local-kroki  # Optional service, enable with --profile local-kroki
+
+networks:
+  diagram-network-dev:
+    driver: bridge 

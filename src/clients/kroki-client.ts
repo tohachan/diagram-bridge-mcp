@@ -1,0 +1,289 @@
+import { 
+  KrokiClient, 
+  KrokiRequestConfig, 
+  DiagramRenderingOutput, 
+  DiagramRenderingError,
+  DiagramRenderingErrorInfo
+} from '../types/diagram-rendering.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
+import { OutputFormat } from '../types/diagram-rendering.js';
+import { getKrokiFormat, getContentType } from '../resources/diagram-rendering-format-mapping.js';
+
+/**
+ * HTTP client for Kroki diagram rendering service
+ */
+export class KrokiHttpClient implements KrokiClient {
+  private config: KrokiRequestConfig;
+
+  constructor(config?: Partial<KrokiRequestConfig>) {
+    this.config = {
+      baseUrl: config?.baseUrl || process.env.KROKI_URL || 'https://kroki.io',
+      timeout: config?.timeout || 30000, // 30 seconds
+      maxRetries: config?.maxRetries || 3,
+      retryDelay: config?.retryDelay || 1000 // 1 second
+    };
+  }
+
+  /**
+   * Render diagram via Kroki API
+   */
+  async renderDiagram(
+    code: string, 
+    format: DiagramFormat, 
+    outputFormat: OutputFormat = 'png'
+  ): Promise<DiagramRenderingOutput> {
+    const krokiFormat = getKrokiFormat(format);
+    const url = this.buildUrl(krokiFormat, outputFormat);
+    
+    let lastError: Error = new Error('No attempts made');
+    
+    for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
+      try {
+        // Add delay between retries (but not on first attempt)
+        if (attempt > 0) {
+          await this.delay(this.config.retryDelay * Math.pow(2, attempt - 1)); // Exponential backoff
+        }
+        
+        const response = await this.makeRequest(url, code);
+        return await this.processResponse(response, outputFormat);
+        
+      } catch (error) {
+        lastError = error as Error;
+        
+        // Don't retry on certain types of errors
+        if (this.isNonRetryableError(error)) {
+          break;
+        }
+        
+        // Log retry attempt
+        console.warn(`Kroki request attempt ${attempt + 1} failed:`, error instanceof Error ? error.message : error);
+      }
+    }
+    
+    // All retries exhausted, throw the last error
+    throw this.createRenderingError(lastError);
+  }
+
+  /**
+   * Health check for Kroki service
+   */
+  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details: string[] }> {
+    const details: string[] = [];
+    
+    try {
+      // Test with a simple mermaid diagram
+      const testCode = 'graph TD\nA-->B';
+      const result = await this.renderDiagram(testCode, 'mermaid', 'png');
+      
+      if (!result.image_data || result.image_data.length < 100) {
+        details.push('Response image data is too small');
+      }
+      
+      if (result.content_type !== 'image/png') {
+        details.push(`Unexpected content type: ${result.content_type}`);
+      }
+      
+      return {
+        status: details.length === 0 ? 'healthy' : 'unhealthy',
+        details
+      };
+      
+    } catch (error) {
+      details.push(`Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return {
+        status: 'unhealthy',
+        details
+      };
+    }
+  }
+
+  /**
+   * Build request URL for Kroki API
+   */
+  private buildUrl(krokiFormat: string, outputFormat: OutputFormat): string {
+    const baseUrl = this.config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    return `${baseUrl}/${krokiFormat}/${outputFormat}`;
+  }
+
+  /**
+   * Make HTTP request with timeout
+   */
+  private async makeRequest(url: string, code: string): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'Accept': '*/*'
+        },
+        body: code,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response;
+      
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Request timeout after ${this.config.timeout}ms`);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Process successful response and create output
+   */
+  private async processResponse(response: Response, outputFormat: OutputFormat): Promise<DiagramRenderingOutput> {
+    try {
+      const arrayBuffer = await response.arrayBuffer();
+      const base64Data = Buffer.from(arrayBuffer).toString('base64');
+      const contentType = getContentType(outputFormat);
+      
+      if (!base64Data || base64Data.length < 100) {
+        throw new Error('Received empty or invalid image data from Kroki');
+      }
+      
+      return {
+        image_data: base64Data,
+        content_type: contentType
+      };
+      
+    } catch (error) {
+      throw new Error(`Failed to process Kroki response: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Check if error should not be retried
+   */
+  private isNonRetryableError(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    
+    const message = error.message.toLowerCase();
+    
+    // Don't retry on client errors (4xx) or syntax errors
+    return message.includes('http 4') || 
+           message.includes('syntax') ||
+           message.includes('invalid') ||
+           message.includes('malformed');
+  }
+
+  /**
+   * Create appropriate rendering error from caught error
+   */
+  private createRenderingError(error: Error): DiagramRenderingErrorInfo {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('timeout')) {
+      return {
+        type: 'TIMEOUT_ERROR' as DiagramRenderingError,
+        message: `Request timeout: ${error.message}`,
+        retryable: true
+      };
+    }
+    
+    if (message.includes('network') || message.includes('fetch')) {
+      return {
+        type: 'NETWORK_ERROR' as DiagramRenderingError,
+        message: `Network error: ${error.message}`,
+        retryable: true
+      };
+    }
+    
+    if (message.includes('http 5')) {
+      return {
+        type: 'KROKI_UNAVAILABLE' as DiagramRenderingError,
+        message: `Kroki service error: ${error.message}`,
+        retryable: true
+      };
+    }
+    
+    if (message.includes('http 4') || message.includes('syntax') || message.includes('invalid')) {
+      return {
+        type: 'SYNTAX_ERROR' as DiagramRenderingError,
+        message: `Invalid diagram syntax: ${error.message}`,
+        retryable: false
+      };
+    }
+    
+    return {
+      type: 'UNKNOWN_ERROR' as DiagramRenderingError,
+      message: `Unexpected error: ${error.message}`,
+      retryable: false
+    };
+  }
+
+  /**
+   * Sleep for specified number of milliseconds
+   */
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Update configuration
+   */
+  updateConfig(newConfig: Partial<KrokiRequestConfig>): void {
+    this.config = { ...this.config, ...newConfig };
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfig(): KrokiRequestConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Test connection to Kroki service
+   */
+  async testConnection(): Promise<{ connected: boolean; responseTime: number; error?: string }> {
+    const startTime = Date.now();
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for test
+      
+      const response = await fetch(this.config.baseUrl, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      const responseTime = Date.now() - startTime;
+      
+      if (response.ok) {
+        return {
+          connected: true,
+          responseTime
+        };
+      } else {
+        return {
+          connected: false,
+          responseTime,
+          error: `HTTP ${response.status}: ${response.statusText}`
+        };
+      }
+      
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+      return {
+        connected: false,
+        responseTime,
+        error: error instanceof Error ? error.message : 'Unknown connection error'
+      };
+    }
+  }
+} 

@@ -5,6 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { DiagramSelectionHandler } from './resources/diagram-selection-handler.js';
 import { DiagramInstructionsHandler } from './resources/diagram-instructions-handler.js';
+import { KrokiRenderingHandler, ProcessingError } from './resources/kroki-rendering-handler.js';
 
 /**
  * Diagram Bridge MCP Server
@@ -14,6 +15,7 @@ import { DiagramInstructionsHandler } from './resources/diagram-instructions-han
 // Initialize the handlers
 const diagramHandler = new DiagramSelectionHandler();
 const instructionsHandler = new DiagramInstructionsHandler();
+const renderingHandler = new KrokiRenderingHandler();
 
 // Create the MCP server
 const server = new McpServer({
@@ -95,6 +97,73 @@ server.registerTool(
         content: [{
           type: 'text',
           text: `Error processing request: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+// Register the diagram rendering tool
+server.registerTool(
+  'render_diagram',
+  {
+    title: 'Render Diagram',
+    description: 'Render diagram source code into an image using Kroki service',
+    inputSchema: {
+      code: z.string()
+        .min(1, 'Diagram code is required')
+        .max(100000, 'Diagram code must not exceed 100,000 characters')
+        .describe('The source code of the diagram to render'),
+      diagram_format: z.enum(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'])
+        .describe('The format of the diagram source code'),
+      output_format: z.enum(['png', 'svg'])
+        .optional()
+        .describe('The desired output image format (defaults to the first supported format for the diagram type)')
+    }
+  },
+  async ({ code, diagram_format, output_format }) => {
+    try {
+      const result = await renderingHandler.processRequest({
+        code,
+        diagram_format,
+        output_format
+      });
+      
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            image_data: result.image_data,
+            content_type: result.content_type,
+            success: true
+          }, null, 2)
+        }]
+      };
+    } catch (error) {
+      // Handle ProcessingError specifically for better error reporting
+      if (error instanceof ProcessingError) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              error: error.message,
+              error_type: error.errorInfo.type,
+              retryable: error.errorInfo.retryable,
+              success: false
+            }, null, 2)
+          }],
+          isError: true
+        };
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            error: `Error rendering diagram: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            success: false
+          }, null, 2)
         }],
         isError: true
       };
@@ -269,6 +338,73 @@ server.registerResource(
   }
 );
 
+// Register diagram rendering health check resource
+server.registerResource(
+  'health',
+  'diagram_rendering_health',
+  {
+    title: 'Diagram Rendering Health Check',
+    description: 'Health check endpoint for the diagram rendering service',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    try {
+      const healthStatus = await renderingHandler.healthCheck();
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify(healthStatus, null, 2)
+        }]
+      };
+    } catch (error) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }, null, 2)
+        }]
+      };
+    }
+  }
+);
+
+// Register diagram rendering metrics resource
+server.registerResource(
+  'metrics',
+  'diagram_rendering_metrics',
+  {
+    title: 'Diagram Rendering Metrics',
+    description: 'Performance metrics for the diagram rendering service',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    try {
+      const metrics = await renderingHandler.getMetrics();
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify(metrics, null, 2)
+        }]
+      };
+    } catch (error) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }, null, 2)
+        }]
+      };
+    }
+  }
+);
+
 // Server configuration
 const SERVER_CONFIG = {
   name: 'diagram-bridge-mcp',
@@ -300,6 +436,12 @@ async function main() {
       console.log('  Issues:', instructionsHealthStatus.details);
     }
     
+    const renderingHealthStatus = await renderingHandler.healthCheck();
+    console.log(`Diagram Rendering: ${renderingHealthStatus.status}`);
+    if (renderingHealthStatus.details.length > 0) {
+      console.log('  Issues:', renderingHealthStatus.details);
+    }
+    
     console.log('');
   } catch (error) {
     console.error('Failed to perform initial health checks:', error);
@@ -311,11 +453,14 @@ async function main() {
   console.log('- diagram_format_catalog: Catalog of all supported diagram formats with their characteristics');
   console.log('- diagram_instructions_health: Health check endpoint for the diagram instructions service');
   console.log('- diagram_instructions_metrics: Performance metrics for the diagram instructions service');
+  console.log('- diagram_rendering_health: Health check endpoint for the diagram rendering service');
+  console.log('- diagram_rendering_metrics: Performance metrics for the diagram rendering service');
   console.log('');
   
   console.log('Available tools:');
   console.log('- help_choose_diagram: Generate structured prompts for diagram format selection');
   console.log('- get_diagram_instructions: Generate format-specific instruction prompts for diagram code creation');
+  console.log('- render_diagram: Render diagram source code into images via Kroki service');
   console.log('');
 
   // Connect to stdio transport

@@ -1,0 +1,96 @@
+services:
+  # Diagram Bridge MCP Server
+  diagram-bridge-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diagram-bridge-mcp
+    restart: "no"
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - KROKI_URL=http://kroki:8000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      kroki:
+        condition: service_healthy
+    networks:
+      - diagram-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Kroki Diagram Rendering Service
+  kroki:
+    image: yuzutech/kroki:latest
+    container_name: kroki
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - KROKI_BLOCKDIAG_HOST=blockdiag
+      - KROKI_MERMAID_HOST=mermaid
+      - KROKI_BPMN_HOST=bpmn
+      - KROKI_EXCALIDRAW_HOST=excalidraw
+    networks:
+      - diagram-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Mermaid Service for Kroki
+  mermaid:
+    image: yuzutech/kroki-mermaid:latest
+    container_name: kroki-mermaid
+    restart: unless-stopped
+    expose:
+      - "8002"
+    networks:
+      - diagram-network
+
+  # BlockDiag Service for Kroki (supports various diagram types)
+  blockdiag:
+    image: yuzutech/kroki-blockdiag:latest
+    container_name: kroki-blockdiag
+    restart: unless-stopped
+    expose:
+      - "8001"
+    networks:
+      - diagram-network
+
+  # BPMN Service for Kroki
+  bpmn:
+    image: yuzutech/kroki-bpmn:latest
+    container_name: kroki-bpmn
+    restart: unless-stopped
+    expose:
+      - "8003"
+    networks:
+      - diagram-network
+
+  # Excalidraw Service for Kroki
+  excalidraw:
+    image: yuzutech/kroki-excalidraw:latest
+    container_name: kroki-excalidraw
+    restart: unless-stopped
+    expose:
+      - "8004"
+    networks:
+      - diagram-network
+
+networks:
+  diagram-network:
+    driver: bridge
+
+volumes:
+  # Optional: Add volumes for persistent data if needed
+  kroki_data:
+    driver: local 

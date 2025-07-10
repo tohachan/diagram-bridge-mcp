@@ -4,14 +4,16 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { DiagramSelectionHandler } from './resources/diagram-selection-handler.js';
+import { DiagramInstructionsHandler } from './resources/diagram-instructions-handler.js';
 
 /**
  * Diagram Bridge MCP Server
  * Provides automated diagram format selection through intelligent heuristics
  */
 
-// Initialize the handler
+// Initialize the handlers
 const diagramHandler = new DiagramSelectionHandler();
+const instructionsHandler = new DiagramInstructionsHandler();
 
 // Create the MCP server
 const server = new McpServer({
@@ -40,6 +42,46 @@ server.registerTool(
       const result = await diagramHandler.processRequest({
         user_request,
         available_formats
+      });
+      
+      return {
+        content: [{
+          type: 'text',
+          text: result.prompt_text
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error processing request: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+// Register the diagram instructions tool
+server.registerTool(
+  'get_diagram_instructions',
+  {
+    title: 'Get Diagram Instructions',
+    description: 'Generate format-specific instruction prompts to help LLMs create syntactically correct diagram code',
+    inputSchema: {
+      user_request: z.string()
+        .min(5, 'User request must be at least 5 characters')
+        .max(2000, 'User request must not exceed 2000 characters')
+        .describe('Original natural language request describing what diagram to create'),
+      diagram_format: z.enum(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'])
+        .describe('Target diagram language/format')
+    }
+  },
+  async ({ user_request, diagram_format }) => {
+    try {
+      const result = await instructionsHandler.processRequest({
+        user_request,
+        diagram_format
       });
       
       return {
@@ -160,6 +202,73 @@ server.registerResource(
   }
 );
 
+// Register instruction health check resource
+server.registerResource(
+  'health',
+  'diagram_instructions_health',
+  {
+    title: 'Diagram Instructions Health Check',
+    description: 'Health check endpoint for the diagram instructions service',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    try {
+      const healthStatus = await instructionsHandler.healthCheck();
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify(healthStatus, null, 2)
+        }]
+      };
+    } catch (error) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }, null, 2)
+        }]
+      };
+    }
+  }
+);
+
+// Register instruction metrics resource
+server.registerResource(
+  'metrics',
+  'diagram_instructions_metrics',
+  {
+    title: 'Diagram Instructions Metrics',
+    description: 'Performance metrics for the diagram instructions service',
+    mimeType: 'application/json'
+  },
+  async (uri) => {
+    try {
+      const metrics = await instructionsHandler.getMetrics();
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify(metrics, null, 2)
+        }]
+      };
+    } catch (error) {
+      return {
+        contents: [{
+          uri: uri.href,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }, null, 2)
+        }]
+      };
+    }
+  }
+);
+
 // Server configuration
 const SERVER_CONFIG = {
   name: 'diagram-bridge-mcp',
@@ -175,27 +284,38 @@ async function main() {
   console.log(`Description: ${SERVER_CONFIG.description}`);
   console.log('');
   
-  // Perform initial health check
+  // Perform initial health checks
   try {
-    const healthStatus = await diagramHandler.healthCheck();
-    console.log('Initial health check:');
-    console.log(`Status: ${healthStatus.status}`);
-    if (healthStatus.details.length > 0) {
-      console.log('Issues:', healthStatus.details);
+    console.log('Initial health checks:');
+    
+    const selectionHealthStatus = await diagramHandler.healthCheck();
+    console.log(`Diagram Selection: ${selectionHealthStatus.status}`);
+    if (selectionHealthStatus.details.length > 0) {
+      console.log('  Issues:', selectionHealthStatus.details);
     }
+    
+    const instructionsHealthStatus = await instructionsHandler.healthCheck();
+    console.log(`Diagram Instructions: ${instructionsHealthStatus.status}`);
+    if (instructionsHealthStatus.details.length > 0) {
+      console.log('  Issues:', instructionsHealthStatus.details);
+    }
+    
     console.log('');
   } catch (error) {
-    console.error('Failed to perform initial health check:', error);
+    console.error('Failed to perform initial health checks:', error);
   }
 
   console.log('Available resources:');
   console.log('- diagram_selection_health: Health check endpoint for the diagram selection service');
   console.log('- diagram_selection_metrics: Performance metrics for the diagram selection service');
   console.log('- diagram_format_catalog: Catalog of all supported diagram formats with their characteristics');
+  console.log('- diagram_instructions_health: Health check endpoint for the diagram instructions service');
+  console.log('- diagram_instructions_metrics: Performance metrics for the diagram instructions service');
   console.log('');
   
   console.log('Available tools:');
   console.log('- help_choose_diagram: Generate structured prompts for diagram format selection');
+  console.log('- get_diagram_instructions: Generate format-specific instruction prompts for diagram code creation');
   console.log('');
 
   // Connect to stdio transport

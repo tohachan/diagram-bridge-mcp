@@ -5,7 +5,15 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",
     "flowmcp": "^2.1.1",
-    "typescript": "^5.8.3"
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0",
+    "ts-jest": "^29.2.0"
   },
   "keywords": [
     "mcp",
@@ -22,8 +30,13 @@
   "license": "MIT",
   "author": "Anton An",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "clean": "rm -rf dist"
   }
 }

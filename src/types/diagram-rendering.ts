@@ -35,14 +35,24 @@ export interface DiagramRenderingInput {
  */
 export interface DiagramRenderingOutput {
   /**
-   * Base64 encoded image data
+   * Path to the saved diagram file (relative to project root)
    */
-  image_data: string;
+  file_path: string;
+  
+  /**
+   * Resource URI for accessing the diagram via MCP
+   */
+  resource_uri: string;
   
   /**
    * MIME type of the output image
    */
   content_type: string;
+  
+  /**
+   * File size in bytes
+   */
+  file_size: number;
 }
 
 /**
@@ -83,12 +93,13 @@ export interface KrokiRequestConfig {
  */
 export interface KrokiClient {
   /**
-   * Render diagram via Kroki API
+   * Render diagram via Kroki API and save to file
    */
   renderDiagram(
     code: string, 
     format: DiagramFormat, 
-    outputFormat: OutputFormat
+    outputFormat: OutputFormat,
+    outputPath: string
   ): Promise<DiagramRenderingOutput>;
   
   /**
@@ -112,7 +123,7 @@ export interface CacheEntry {
   timestamp: number;
   
   /**
-   * Size of the cached data in bytes
+   * Size of the cached data in bytes (file size)
    */
   size: number;
 }

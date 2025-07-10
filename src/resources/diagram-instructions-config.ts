@@ -117,38 +117,49 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
     displayName: 'PlantUML',
     syntaxGuidelines: [
       'Start with @startuml and end with @enduml',
-      'Use skinparam for styling when needed',
+      'Use skinparam for global styling: skinparam packageBackgroundColor LightYellow',
+      'Use !theme directive for predefined themes: !theme plain',
       'Class diagrams: class ClassName { fields, methods }',
       'Sequence diagrams: Actor -> Object : message',
       'Component diagrams: [Component] as alias',
+      'Package styling: package "Name" #LightBlue { ... }',
       'Use -- for associations, --> for dependencies',
-      'Comments start with \' or //'
+      'Comments start with \' or //',
+      'AVOID !define - use skinparam or inline colors instead'
     ],
     bestPractices: [
       'Use meaningful names for classes and components',
       'Group related elements with packages',
-      'Add stereotypes <<interface>>, <<abstract>> when appropriate',
+      'Use standard stereotypes: <<interface>>, <<abstract>>, <<entity>>',
+      'Apply colors directly: package "Name" #LightYellow { ... }',
+      'Use skinparam for consistent global styling',
       'Use notes to add important documentation',
       'Keep diagrams focused on specific aspects',
       'Use proper UML relationship types'
     ],
     commonPitfalls: [
       'DO NOT forget @startuml/@enduml tags',
+      'DO NOT use !define for colors - use skinparam or inline colors',
+      'DO NOT use custom colors in stereotypes like <<CUSTOMCOLOR>>',
       'DO NOT mix diagram types in single diagram',
       'DO NOT use invalid UML relationship syntax',
       'DO NOT create overly complex single diagrams',
-      'DO NOT ignore proper UML stereotypes',
-      'DO NOT use spaces in entity names without quotes'
+      'DO NOT use spaces in entity names without quotes',
+      'DO NOT use <<COLORNAME>> as stereotypes - use standard UML stereotypes only'
     ],
     examplePatterns: [
-      '@startuml\nclass User {\n  +name: String\n  +login()\n}\nUser --> Order\n@enduml',
+      '@startuml\nskinparam packageBackgroundColor LightYellow\nclass User {\n  +name: String\n  +login()\n}\nUser --> Order\n@enduml',
       '@startuml\nactor User\nUser -> System : authenticate\nSystem --> User : token\n@enduml',
-      '@startuml\npackage "Core" {\n  [UserService]\n  [AuthService]\n}\n@enduml'
+      '@startuml\npackage "Core" #LightBlue {\n  [UserService]\n  [AuthService]\n}\n@enduml',
+      '@startuml\nskinparam packageBackgroundColor LightGreen\nskinparam componentBackgroundColor LightYellow\npackage "Frontend" {\n  [UI] <<interface>>\n}\n@enduml'
     ],
     outputSpecifications: [
       'Output ONLY the PlantUML code without markdown wrapper',
       'Always include @startuml at the beginning',
       'Always include @enduml at the end',
+      'Use skinparam for styling, not !define',
+      'Use inline package colors: package "Name" #Color { ... }',
+      'Use only standard UML stereotypes in << >>',
       'Use proper UML syntax and relationships',
       'Ensure all referenced entities are defined'
     ]

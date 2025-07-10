@@ -287,11 +287,14 @@ export class DiagramRenderingValidator {
 
     const typedOutput = output as Partial<DiagramRenderingOutput>;
 
-    // Validate image_data
-    if (!typedOutput.image_data || typeof typedOutput.image_data !== 'string') {
-      errors.push('image_data is required and must be a string');
-    } else if (typedOutput.image_data.length < 100) {
-      errors.push('image_data appears to be too short to be valid base64 image data');
+    // Validate file_path
+    if (!typedOutput.file_path || typeof typedOutput.file_path !== 'string') {
+      errors.push('file_path is required and must be a string');
+    }
+
+    // Validate resource_uri
+    if (!typedOutput.resource_uri || typeof typedOutput.resource_uri !== 'string') {
+      errors.push('resource_uri is required and must be a string');
     }
 
     // Validate content_type
@@ -302,6 +305,11 @@ export class DiagramRenderingValidator {
       if (!validContentTypes.includes(typedOutput.content_type)) {
         errors.push(`Invalid content_type: ${typedOutput.content_type}. Must be one of: ${validContentTypes.join(', ')}`);
       }
+    }
+
+    // Validate file_size
+    if (typeof typedOutput.file_size !== 'number' || typedOutput.file_size < 0) {
+      errors.push('file_size is required and must be a non-negative number');
     }
 
     return {

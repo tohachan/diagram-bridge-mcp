@@ -148,6 +148,7 @@ docker run -d \
 | `PORT` | `3000` | Server port |
 | `KROKI_URL` | `https://kroki.io` | Kroki service URL |
 | `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
+| `DIAGRAM_STORAGE_PATH` | `{cwd}/generated-diagrams` | Directory for storing rendered diagram files |
 
 ### Docker Services Overview
 
@@ -269,6 +270,62 @@ npm install -g diagram-bridge-mcp
 ```
 
 Replace `/path/to/diagram-bridge-mcp` with the actual path to your cloned repository.
+
+### Custom Storage Configuration
+
+By default, rendered diagram files are saved to `{current-working-directory}/generated-diagrams/` with absolute file paths. You can customize this location using the `DIAGRAM_STORAGE_PATH` environment variable.
+
+**Default behavior:**
+```json
+{
+  "success": true,
+  "file_path": "/Users/you/projects/diagram-bridge-mcp/generated-diagrams/diagram-mermaid-1234567890.png",
+  "resource_uri": "diagram://saved/diagram-mermaid-1234567890.png",
+  "content_type": "image/png",
+  "file_size": 45678
+}
+```
+
+**Custom storage path:**
+```bash
+# Set custom storage directory
+export DIAGRAM_STORAGE_PATH="/tmp/my-diagrams"
+
+# Or use relative path (resolved to absolute)
+export DIAGRAM_STORAGE_PATH="./custom-diagrams"
+
+# Start server with custom path
+npm start
+```
+
+**With custom path, responses include:**
+```json
+{
+  "success": true,
+  "file_path": "/tmp/my-diagrams/diagram-mermaid-1234567890.png",
+  "resource_uri": "diagram://saved/diagram-mermaid-1234567890.png",
+  "content_type": "image/png", 
+  "file_size": 45678
+}
+```
+
+**Using in Cursor with custom path:**
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "/path/to/diagram-bridge-mcp",
+      "env": {
+        "DIAGRAM_STORAGE_PATH": "/Users/you/Documents/diagrams"
+      }
+    }
+  }
+}
+```
+
+This ensures LLMs can easily copy and manipulate the generated files using their absolute paths.
 
 ### Example Usage
 

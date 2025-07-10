@@ -8,6 +8,7 @@ import {
 import { DiagramFormat } from '../types/diagram-selection.js';
 import { OutputFormat } from '../types/diagram-rendering.js';
 import { getKrokiFormat, getContentType } from '../resources/diagram-rendering-format-mapping.js';
+import { getDiagramFilePath } from '../utils/file-path.js';
 
 /**
  * HTTP client for Kroki diagram rendering service
@@ -25,12 +26,13 @@ export class KrokiHttpClient implements KrokiClient {
   }
 
   /**
-   * Render diagram via Kroki API
+   * Render diagram via Kroki API and save to file
    */
   async renderDiagram(
     code: string, 
     format: DiagramFormat, 
-    outputFormat: OutputFormat = 'png'
+    outputFormat: OutputFormat = 'png',
+    outputPath: string
   ): Promise<DiagramRenderingOutput> {
     const krokiFormat = getKrokiFormat(format);
     const url = this.buildUrl(krokiFormat, outputFormat);
@@ -45,7 +47,7 @@ export class KrokiHttpClient implements KrokiClient {
         }
         
         const response = await this.makeRequest(url, code);
-        return await this.processResponse(response, outputFormat);
+        return await this.processResponse(response, outputFormat, outputPath);
         
       } catch (error) {
         lastError = error as Error;
@@ -56,7 +58,7 @@ export class KrokiHttpClient implements KrokiClient {
         }
         
         // Log retry attempt
-        console.warn(`Kroki request attempt ${attempt + 1} failed:`, error instanceof Error ? error.message : error);
+        console.error(`Kroki request attempt ${attempt + 1} failed:`, error instanceof Error ? error.message : error);
       }
     }
     
@@ -73,14 +75,24 @@ export class KrokiHttpClient implements KrokiClient {
     try {
       // Test with a simple mermaid diagram
       const testCode = 'graph TD\nA-->B';
-      const result = await this.renderDiagram(testCode, 'mermaid', 'png');
+      const fileName = `health-check-${Date.now()}.png`;
+      const testPath = getDiagramFilePath(fileName);
+      const result = await this.renderDiagram(testCode, 'mermaid', 'png', testPath);
       
-      if (!result.image_data || result.image_data.length < 100) {
-        details.push('Response image data is too small');
+      if (!result.file_path || result.file_size < 100) {
+        details.push('Response file is too small or missing');
       }
       
       if (result.content_type !== 'image/png') {
         details.push(`Unexpected content type: ${result.content_type}`);
+      }
+      
+      // Clean up test file
+      try {
+        const fs = await import('fs/promises');
+        await fs.unlink(result.file_path);
+      } catch {
+        // Ignore cleanup errors
       }
       
       return {
@@ -143,21 +155,37 @@ export class KrokiHttpClient implements KrokiClient {
   }
 
   /**
-   * Process successful response and create output
+   * Process successful response and save to file
    */
-  private async processResponse(response: Response, outputFormat: OutputFormat): Promise<DiagramRenderingOutput> {
+  private async processResponse(response: Response, outputFormat: OutputFormat, outputPath: string): Promise<DiagramRenderingOutput> {
     try {
       const arrayBuffer = await response.arrayBuffer();
-      const base64Data = Buffer.from(arrayBuffer).toString('base64');
+      const buffer = Buffer.from(arrayBuffer);
       const contentType = getContentType(outputFormat);
       
-      if (!base64Data || base64Data.length < 100) {
+      if (!buffer || buffer.length < 100) {
         throw new Error('Received empty or invalid image data from Kroki');
       }
       
+      // Save to file
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      // Ensure directory exists
+      const dir = path.dirname(outputPath);
+      await fs.mkdir(dir, { recursive: true });
+      
+      // Write file
+      await fs.writeFile(outputPath, buffer);
+      
+      // Create resource URI
+      const resourceUri = `diagram://saved/${path.basename(outputPath)}`;
+      
       return {
-        image_data: base64Data,
-        content_type: contentType
+        file_path: outputPath,
+        resource_uri: resourceUri,
+        content_type: contentType,
+        file_size: buffer.length
       };
       
     } catch (error) {

@@ -34,8 +34,8 @@ export class DiagramLRUCache implements DiagramCache {
     this.missCount = 0;
 
     // Initialize dummy head and tail nodes for easier list manipulation
-    this.head = { key: '', value: { data: { image_data: '', content_type: '' }, timestamp: 0, size: 0 }, prev: null, next: null };
-    this.tail = { key: '', value: { data: { image_data: '', content_type: '' }, timestamp: 0, size: 0 }, prev: null, next: null };
+    this.head = { key: '', value: { data: { file_path: '', resource_uri: '', content_type: '', file_size: 0 }, timestamp: 0, size: 0 }, prev: null, next: null };
+    this.tail = { key: '', value: { data: { file_path: '', resource_uri: '', content_type: '', file_size: 0 }, timestamp: 0, size: 0 }, prev: null, next: null };
     this.head.next = this.tail;
     this.tail.prev = this.head;
   }
@@ -133,8 +133,8 @@ export class DiagramLRUCache implements DiagramCache {
    * Create cache entry from rendering output
    */
   static createCacheEntry(output: DiagramRenderingOutput): CacheEntry {
-    // Estimate size: base64 string length + content type + object overhead
-    const size = output.image_data.length + output.content_type.length + 100; // 100 bytes overhead estimate
+    // Use actual file size from output
+    const size = output.file_size;
     
     return {
       data: output,

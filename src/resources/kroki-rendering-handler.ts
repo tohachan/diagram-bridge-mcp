@@ -10,6 +10,7 @@ import { DiagramRenderingValidator } from '../utils/diagram-rendering-validation
 import { KrokiHttpClient } from '../clients/kroki-client.js';
 import { DiagramLRUCache } from '../utils/diagram-cache.js';
 import { isFormatOutputSupported, getDefaultOutputFormat } from '../resources/diagram-rendering-format-mapping.js';
+import { getDiagramFilePath, ensureDiagramStorageDirectory } from '../utils/file-path.js';
 
 /**
  * Main handler for the render_diagram MCP tool
@@ -85,11 +86,21 @@ export class KrokiRenderingHandler {
         }
       }
 
+      // Generate unique output file path (absolute)
+      const timestamp = Date.now();
+      const formatExt = (input.output_format || defaultOutputFormat) === 'png' ? 'png' : 'svg';
+      const fileName = `diagram-${input.diagram_format}-${timestamp}.${formatExt}`;
+      const outputPath = getDiagramFilePath(fileName);
+      
+      // Ensure storage directory exists
+      await ensureDiagramStorageDirectory();
+      
       // Render diagram via Kroki
       const output = await this.krokiClient.renderDiagram(
         input.code, 
         input.diagram_format, 
-        input.output_format || defaultOutputFormat
+        input.output_format || defaultOutputFormat,
+        outputPath
       );
 
       // Validate output
@@ -173,7 +184,7 @@ export class KrokiRenderingHandler {
       // Test complete pipeline with small diagram
       try {
         const result = await this.processRequest(testInput);
-        if (!result.image_data || result.image_data.length < 100) {
+        if (!result.file_path || result.file_size < 100) {
           issues.push('Complete pipeline test failed - invalid output');
         }
       } catch (error) {

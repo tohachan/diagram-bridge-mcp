@@ -46,7 +46,7 @@ export class KrokiHttpClient implements KrokiClient {
           await this.delay(this.config.retryDelay * Math.pow(2, attempt - 1)); // Exponential backoff
         }
         
-        const response = await this.makeRequest(url, code);
+        const response = await this.makeRequest(url, code, format);
         return await this.processResponse(response, outputFormat, outputPath);
         
       } catch (error) {
@@ -120,18 +120,32 @@ export class KrokiHttpClient implements KrokiClient {
   /**
    * Make HTTP request with timeout
    */
-  private async makeRequest(url: string, code: string): Promise<Response> {
+  private async makeRequest(url: string, code: string, format: DiagramFormat): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
+      // JSON-based formats need special handling
+      const isJsonFormat = this.isJsonBasedFormat(format);
+      
+      const headers: Record<string, string> = {
+        'Accept': '*/*'
+      };
+      
+      let body: string;
+      
+      if (isJsonFormat) {
+        headers['Content-Type'] = 'application/json';
+        body = JSON.stringify({ diagram_source: code });
+      } else {
+        headers['Content-Type'] = 'text/plain';
+        body = code;
+      }
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
-          'Accept': '*/*'
-        },
-        body: code,
+        headers,
+        body,
         signal: controller.signal
       });
 
@@ -152,6 +166,14 @@ export class KrokiHttpClient implements KrokiClient {
       
       throw error;
     }
+  }
+
+  /**
+   * Check if the format requires JSON payload
+   */
+  private isJsonBasedFormat(format: DiagramFormat): boolean {
+    const jsonFormats = ['excalidraw', 'vega-lite'];
+    return jsonFormats.includes(format);
   }
 
   /**

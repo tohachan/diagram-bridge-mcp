@@ -25,8 +25,8 @@ describe('New Diagram Formats Integration', () => {
       expect(config!.id).toBe(format);
       expect(config!.enabled).toBe(true);
       
-      // BPMN only supports SVG, others support both PNG and SVG
-      if (format === 'bpmn') {
+      // Some formats only support SVG, others support both PNG and SVG
+      if (format === 'bpmn' || format === 'excalidraw' || format === 'vega-lite') {
         expect(config!.supportedOutputs).toEqual(['svg']);
       } else {
         expect(config!.supportedOutputs).toEqual(expect.arrayContaining(['png', 'svg']));

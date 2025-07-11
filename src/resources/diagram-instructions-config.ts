@@ -479,44 +479,56 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
     format: 'excalidraw',
     displayName: 'Excalidraw',
     syntaxGuidelines: [
-      'Use simple JSON structure for Excalidraw elements',
-      'Define elements with type, x, y, width, height',
-      'Use element types: rectangle, ellipse, arrow, text, line',
+      'Use Excalidraw JSON structure with type, version, source, elements, appState',
+      'MANDATORY: Include all required fields for each element',
+      'Required element fields: id, type, x, y, width, height, strokeColor, backgroundColor, fillStyle, strokeStyle, strokeWidth, roughness, opacity, seed',
+      'Use element types: rectangle, ellipse, arrow, text, line, diamond',
+      'fillStyle values: "solid", "hachure", "cross-hatch", "dots"',
+      'strokeStyle values: "solid", "dashed", "dotted"',
+      'roughness: number 0-2 (0=smooth, 2=rough)',
+      'opacity: number 0-100',
+      'seed: random integer for consistent rendering',
+      'Use unique string IDs for all elements',
       'Connect elements with arrows using startBinding/endBinding',
-      'Set strokeColor and backgroundColor for styling',
-      'Use text elements for labels and descriptions',
-      'Keep coordinates and sizes reasonable',
-      'Use groupIds for related elements'
+      'Text elements need text, fontSize, fontFamily properties'
     ],
     bestPractices: [
-      'Keep diagrams simple and sketchy',
-      'Use hand-drawn aesthetic appropriately',
-      'Focus on concepts rather than precision',
+      'Always include ALL required fields to prevent rendering errors',
+      'Use fillStyle "solid" for filled shapes, "hachure" for sketchy style',
+      'Set roughness to 1 for balanced hand-drawn aesthetic',
+      'Use opacity 100 for solid elements',
+      'Generate unique seeds (random integers) for each element',
+      'Keep diagrams simple and focused',
       'Use consistent color schemes',
-      'Group related elements together',
-      'Make text readable and appropriately sized',
-      'Use arrows to show relationships clearly'
+      'Group related elements with groupIds',
+      'Make text readable with appropriate fontSize (12-20)',
+      'Use arrows to show clear relationships'
     ],
     commonPitfalls: [
+      'DO NOT omit required fields (fillStyle, roughness, opacity, seed, strokeStyle)',
+      'DO NOT use invalid fillStyle values - only "solid", "hachure", "cross-hatch", "dots"',
+      'DO NOT use invalid strokeStyle values - only "solid", "dashed", "dotted"',
+      'DO NOT forget strokeWidth (typically 1-3)',
+      'DO NOT use roughness outside 0-2 range',
+      'DO NOT forget unique id for each element',
       'DO NOT create overly complex JSON structures',
-      'DO NOT use precise positioning for sketchy style',
+      'DO NOT use tiny or huge elements',
       'DO NOT mix too many different colors',
-      'DO NOT create tiny or huge elements',
-      'DO NOT ignore element relationships',
-      'DO NOT use Excalidraw for formal documentation',
-      'DO NOT overcomplicate simple concepts'
+      'DO NOT ignore appState section'
     ],
     examplePatterns: [
-      '{\n  "type": "excalidraw",\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#ffffff"\n    },\n    {\n      "type": "text",\n      "x": 150,\n      "y": 130,\n      "text": "Component",\n      "fontSize": 16\n    }\n  ]\n}',
-      '{\n  "type": "excalidraw",\n  "elements": [\n    {\n      "type": "ellipse",\n      "x": 50,\n      "y": 50,\n      "width": 100,\n      "height": 60,\n      "strokeColor": "#1e1e1e"\n    },\n    {\n      "type": "arrow",\n      "x": 150,\n      "y": 80,\n      "points": [[0, 0], [100, 0]]\n    }\n  ]\n}'
+      '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "rect1",\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#15aabf",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1234567890\n    },\n    {\n      "id": "text1",\n      "type": "text",\n      "x": 150,\n      "y": 130,\n      "width": 100,\n      "height": 20,\n      "text": "Component",\n      "fontSize": 16,\n      "fontFamily": 1,\n      "strokeColor": "#000000",\n      "opacity": 100,\n      "roughness": 1,\n      "seed": 9876543210\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}',
+      '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "ellipse1",\n      "type": "ellipse",\n      "x": 50,\n      "y": 50,\n      "width": 120,\n      "height": 80,\n      "strokeColor": "#1e1e1e",\n      "backgroundColor": "transparent",\n      "fillStyle": "hachure",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 5555555555\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}'
     ],
     outputSpecifications: [
-      'Output ONLY the Excalidraw JSON without markdown wrapper',
-      'Use valid JSON structure',
-      'Include required element properties',
-      'Use appropriate coordinate system',
-      'Define clear element relationships',
-      'Keep styling simple and consistent',
+      'Output ONLY the complete Excalidraw JSON without markdown wrapper',
+      'MANDATORY: Include type, version, source, elements array, appState object',
+      'MANDATORY: Each element must have ALL required fields',
+      'Use valid JSON structure with proper syntax',
+      'Include unique IDs for all elements',
+      'Set appropriate fillStyle, strokeStyle, roughness, opacity, seed for each element',
+      'Use strokeWidth 1-3, roughness 0-2, opacity 0-100',
+      'Generate random integer seeds for consistent rendering',
       'Focus on conceptual clarity over precision'
     ]
   },

@@ -198,6 +198,48 @@ describe('Diagram Instructions System', () => {
       const errors = templateEngine.validateTemplateVariables(invalidVariables);
       expect(errors.length).toBeGreaterThan(0);
     });
+
+    test('should include supported image formats in instructions', () => {
+      const templateEngine = new DiagramInstructionTemplate();
+      
+      // Test Mermaid (PNG, SVG)
+      const mermaidInstructions = templateEngine.generateInstructionPrompt({
+        userRequest: 'Create a simple flowchart',
+        diagramFormat: 'mermaid'
+      });
+      
+      expect(mermaidInstructions).toContain('Supported Image Formats');
+      expect(mermaidInstructions).toContain('PNG, SVG');
+      
+      // Test Excalidraw (SVG only)
+      const excalidrawInstructions = templateEngine.generateInstructionPrompt({
+        userRequest: 'Create a simple sketch',
+        diagramFormat: 'excalidraw'
+      });
+      
+      expect(excalidrawInstructions).toContain('Supported Image Formats');
+      expect(excalidrawInstructions).toContain('SVG');
+      expect(excalidrawInstructions).not.toContain('PNG');
+      
+      // Test D2 (SVG only)
+      const d2Instructions = templateEngine.generateInstructionPrompt({
+        userRequest: 'Create a system diagram',
+        diagramFormat: 'd2'
+      });
+      
+      expect(d2Instructions).toContain('Supported Image Formats');
+      expect(d2Instructions).toContain('SVG');
+      expect(d2Instructions).not.toContain('PNG');
+      
+      // Test PlantUML (PNG, SVG)
+      const plantumlInstructions = templateEngine.generateInstructionPrompt({
+        userRequest: 'Create a class diagram',
+        diagramFormat: 'plantuml'
+      });
+      
+      expect(plantumlInstructions).toContain('Supported Image Formats');
+      expect(plantumlInstructions).toContain('PNG, SVG');
+    });
   });
 
   describe('Instructions Handler', () => {

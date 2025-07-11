@@ -5,6 +5,7 @@ import {
 } from '../types/diagram-instructions.js';
 import { DiagramFormat } from '../types/diagram-selection.js';
 import { getFormatInstructionTemplate } from '../utils/format-validation.js';
+import { DiagramFormatsFactory } from '../config/diagram-formats-factory.js';
 
 /**
  * Main instruction template for diagram code generation
@@ -46,7 +47,9 @@ Generate {displayName} code that:
 
 {complexityGuidance}
 
-**IMPORTANT**: Output ONLY the {displayName} code. Do not include explanations, markdown wrappers, or additional text. The output should be ready to render immediately.`;
+**IMPORTANT**: Output ONLY the {displayName} code. Do not include explanations, markdown wrappers, or additional text. The output should be ready to render immediately.
+
+{supportedFormats}`;
 
 /**
  * Complexity-specific guidance templates
@@ -150,6 +153,9 @@ export class DiagramInstructionTemplate {
     const complexityGuidanceText = COMPLEXITY_GUIDANCE[complexityLevel]
       .replace(/{displayName}/g, template.displayName);
 
+    // Generate supported formats information
+    const supportedFormats = this.generateSupportedFormatsInfo(diagramFormat);
+
     return DIAGRAM_INSTRUCTION_PROMPT_TEMPLATE
       .replace(/{displayName}/g, template.displayName)
       .replace(/{userRequest}/g, userRequest)
@@ -160,7 +166,8 @@ export class DiagramInstructionTemplate {
       .replace(/{examplePatterns}/g, this.formatExamplePatterns(template.examplePatterns))
       .replace(/{outputSpecifications}/g, this.formatListItems(template.outputSpecifications))
       .replace(/{contextualGuidance}/g, contextualGuidance)
-      .replace(/{complexityGuidance}/g, complexityGuidanceText);
+      .replace(/{complexityGuidance}/g, complexityGuidanceText)
+      .replace(/{supportedFormats}/g, supportedFormats);
   }
 
   /**
@@ -168,6 +175,26 @@ export class DiagramInstructionTemplate {
    */
   private generateFormatDescription(template: FormatInstructionTemplate): string {
     return `${template.displayName} is specialized for creating ${template.format} diagrams with specific syntax and conventions.`;
+  }
+
+  /**
+   * Generate supported image formats information
+   */
+  private generateSupportedFormatsInfo(diagramFormat: DiagramFormat): string {
+    const registry = DiagramFormatsFactory.createDefaultRegistry();
+    const formatConfig = registry.formats[diagramFormat];
+    
+    if (!formatConfig) {
+      return '';
+    }
+
+    const supportedOutputs = formatConfig.supportedOutputs;
+    if (!supportedOutputs || supportedOutputs.length === 0) {
+      return '';
+    }
+
+    const formatsList = supportedOutputs.map(format => format.toUpperCase()).join(', ');
+    return `## Supported Image Formats\n${formatsList}`;
   }
 
   /**

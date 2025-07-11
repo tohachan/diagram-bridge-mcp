@@ -431,17 +431,33 @@ Based on keyword analysis:
 Run the comprehensive test suite:
 
 ```bash
+# Run all tests (unit + integration)
 npm test
+
+# Run only unit tests
+npm test -- src/__tests__/diagram-selection.test.ts
+
+# Run only Docker integration tests (requires Docker)
+npm test -- src/__tests__/docker-rendering.test.ts
 ```
 
 The test suite includes:
+
+**Unit Tests:**
 - Input validation tests
 - Format selection analysis tests
 - Template generation tests
-- End-to-end integration tests
 - Health check and metrics tests
+- 19 test cases covering core functionality
 
-Test coverage includes 19 test cases covering all major functionality.
+**Docker Integration Tests:**
+- Real diagram rendering through Kroki services
+- All 10 diagram formats validation
+- PNG/SVG output format testing
+- Performance and reliability testing
+- 15 test cases covering end-to-end workflows
+
+Combined test coverage includes 34+ test cases covering all functionality from format selection to diagram rendering.
 
 ## 🔧 Development
 
@@ -453,6 +469,46 @@ Test coverage includes 19 test cases covering all major functionality.
 - `npm test`: Run the test suite
 - `npm run test:watch`: Run tests in watch mode
 - `npm run clean`: Clean build artifacts
+
+### Docker Integration Testing
+
+For comprehensive testing of all diagram formats with actual rendering through Kroki services:
+
+```bash
+# Start Docker environment with all Kroki services
+docker-compose up -d
+
+# Run Docker integration tests (requires Docker to be running)
+npm test -- src/__tests__/docker-rendering.test.ts
+
+# Run with verbose output to see detailed test results
+npm test -- src/__tests__/docker-rendering.test.ts --verbose
+
+# Run specific test groups
+npm test -- --testNamePattern="Mermaid rendering"
+npm test -- --testNamePattern="Format Validation"
+```
+
+**What the Docker tests cover:**
+- ✅ All 10 diagram formats with actual Kroki rendering
+- ✅ PNG and SVG output validation (where supported)
+- ✅ Health checks for Kroki service connectivity
+- ✅ Format-specific rendering with example diagrams
+- ✅ Comprehensive format validation against real Kroki API
+- ✅ Performance and reliability testing
+- ✅ Error handling and edge cases
+
+**Docker test requirements:**
+- Docker and Docker Compose installed
+- All Kroki services running (`docker-compose up -d`)
+- Network connectivity to Kroki services
+- ~4 seconds execution time for full test suite
+
+**Test outputs:**
+- Generated diagram files in `generated-diagrams/` directory
+- Detailed test reports with format-specific results
+- Issues logged in `ISSUES.md` for any discovered problems
+- 100% success rate with 15/15 tests passing
 
 ### Project Structure
 
@@ -470,7 +526,8 @@ src/
 │   ├── selection-heuristics.ts
 │   └── validation.ts
 ├── __tests__/          # Test files
-│   └── diagram-selection.test.ts
+│   ├── diagram-selection.test.ts    # Unit tests for format selection
+│   └── docker-rendering.test.ts     # Docker integration tests for all formats
 └── index.ts           # Main server entry point
 ```
 

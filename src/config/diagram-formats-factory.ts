@@ -690,7 +690,7 @@ export class DiagramFormatsFactory {
       displayName: 'Excalidraw',
       description: 'Hand-drawn style diagrams and sketches',
       krokiFormat: 'excalidraw',
-      supportedOutputs: ['png', 'svg'],
+      supportedOutputs: ['svg'], // Excalidraw only supports SVG output in Kroki
       enabled: true,
       characteristics: {
         strengths: [
@@ -722,38 +722,55 @@ export class DiagramFormatsFactory {
       },
       instructionTemplate: {
         syntaxGuidelines: [
-          'Use Excalidraw JSON format',
-          'Define elements array with shapes',
-          'Include appState and files properties',
-          'Use standard element types: rectangle, ellipse, arrow, text',
-          'Set coordinates and dimensions for positioning'
+          'Use Excalidraw JSON format with ALL required fields',
+          'MANDATORY fields: type, version, source, elements, appState',
+          'MANDATORY element fields: id, type, x, y, width, height, strokeColor, backgroundColor, fillStyle, strokeStyle, strokeWidth, roughness, opacity, seed',
+          'Use element types: rectangle, ellipse, arrow, text, line, diamond',
+          'fillStyle values: "solid", "hachure", "cross-hatch", "dots"',
+          'strokeStyle values: "solid", "dashed", "dotted"',
+          'roughness: 0-2 (0=smooth, 2=rough)',
+          'opacity: 0-100, seed: random integer',
+          'Text elements need: text, fontSize, fontFamily',
+          'Use unique string IDs for all elements'
         ],
         bestPractices: [
+          'ALWAYS include ALL required fields to prevent "Cannot read properties of undefined" errors',
+          'Use fillStyle "solid" for filled shapes, "hachure" for sketchy style',
+          'Set roughness to 1 for balanced hand-drawn aesthetic',
+          'Use opacity 100 for solid elements',
+          'Generate unique random seeds for each element',
           'Keep drawings simple and clear',
           'Use consistent colors and styles',
-          'Group related elements',
-          'Add descriptive text labels',
+          'Group related elements with groupIds',
+          'Add descriptive text labels with fontSize 12-20',
           'Maintain readable proportions'
         ],
         commonPitfalls: [
+          'DO NOT omit fillStyle, strokeStyle, roughness, opacity, seed - these cause rendering errors',
+          'DO NOT use invalid fillStyle values (only "solid", "hachure", "cross-hatch", "dots")',
+          'DO NOT use invalid strokeStyle values (only "solid", "dashed", "dotted")',
+          'DO NOT forget strokeWidth (use 1-3)',
+          'DO NOT use roughness outside 0-2 range',
           'DO NOT use invalid JSON format',
-          'DO NOT forget required properties',
+          'DO NOT forget unique id for each element',
           'DO NOT create overly complex drawings',
           'DO NOT ignore element positioning',
-          'DO NOT use unsupported element types'
+          'DO NOT omit version and source fields'
         ],
         examplePatterns: [
-          '{\n  "type": "excalidraw",\n  "version": 2,\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "label": "System"\n    }\n  ]\n}'
+          '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "rect1",\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#15aabf",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1234567890\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}'
         ],
         outputSpecifications: [
-          'Output ONLY valid Excalidraw JSON',
-          'Include type and version properties',
-          'Define elements array with shapes',
-          'Use proper coordinate positioning'
+          'Output ONLY valid Excalidraw JSON without markdown wrapper',
+          'MANDATORY: Include type, version, source, elements array, appState object',
+          'MANDATORY: Each element must have ALL required fields including fillStyle, strokeStyle, roughness, opacity, seed',
+          'Define complete element objects with unique IDs',
+          'Use proper coordinate positioning and valid field values',
+          'Generate random seeds for consistent rendering'
         ]
       },
       fileExtensions: ['.excalidraw', '.json'],
-      exampleCode: '{\n  "type": "excalidraw",\n  "version": 2,\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "label": "System"\n    }\n  ]\n}'
+      exampleCode: '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "rect1",\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 80,\n      "strokeColor": "#000000",\n      "backgroundColor": "#15aabf",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1968410350\n    },\n    {\n      "id": "text1",\n      "type": "text",\n      "x": 150,\n      "y": 130,\n      "width": 100,\n      "height": 20,\n      "text": "System",\n      "fontSize": 16,\n      "fontFamily": 1,\n      "strokeColor": "#000000",\n      "opacity": 100,\n      "roughness": 1,\n      "seed": 987654321\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff",\n    "gridSize": 20\n  }\n}'
     };
   }
 
@@ -766,7 +783,7 @@ export class DiagramFormatsFactory {
       displayName: 'Vega-Lite',
       description: 'Grammar of interactive graphics for data visualization',
       krokiFormat: 'vegalite',
-      supportedOutputs: ['png', 'svg'],
+      supportedOutputs: ['svg'], // Vega-Lite PNG has Docker Canvas limitations, SVG works perfectly
       enabled: true,
       characteristics: {
         strengths: [
@@ -819,7 +836,7 @@ export class DiagramFormatsFactory {
           'DO NOT create overly complex visualizations'
         ],
         examplePatterns: [
-          '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"x": 1, "y": 2}]},\n  "mark": "point",\n  "encoding": {\n    "x": {"field": "x", "type": "quantitative"},\n    "y": {"field": "y", "type": "quantitative"}\n  }\n}'
+          '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",\n  "data": {"values": [{"x": 1, "y": 2}]},\n  "mark": "point",\n  "encoding": {\n    "x": {"field": "x", "type": "quantitative"},\n    "y": {"field": "y", "type": "quantitative"}\n  }\n}'
         ],
         outputSpecifications: [
           'Output ONLY valid Vega-Lite JSON',
@@ -829,7 +846,7 @@ export class DiagramFormatsFactory {
         ]
       },
       fileExtensions: ['.vl.json', '.vega'],
-      exampleCode: '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"month": "Jan", "sales": 100}, {"month": "Feb", "sales": 150}]},\n  "mark": "bar",\n  "encoding": {\n    "x": {"field": "month", "type": "ordinal"},\n    "y": {"field": "sales", "type": "quantitative"}\n  }\n}'
+      exampleCode: '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",\n  "data": {"values": [{"month": "Jan", "sales": 100}, {"month": "Feb", "sales": 150}]},\n  "mark": "bar",\n  "encoding": {\n    "x": {"field": "month", "type": "ordinal"},\n    "y": {"field": "sales", "type": "quantitative"}\n  }\n}'
     };
   }
 

@@ -53,8 +53,15 @@ Generate {displayName} code that:
  */
 const COMPLEXITY_GUIDANCE = {
   simple: `Focus on clarity and simplicity. Use basic {displayName} features and avoid complex nested structures.`,
-  moderate: `Balance clarity with functionality. Use intermediate {displayName} features like subgraphs, styling, and proper grouping.`,
-  complex: `Leverage advanced {displayName} features. Ensure proper organization, clear hierarchies, and comprehensive labeling for complex relationships.`
+  moderate: `Balance clarity with functionality. Use intermediate {displayName} features like subgraphs, styling, and proper grouping. Keep the diagram focused and avoid overcomplicating.`,
+  complex: `**IMPORTANT**: For complex diagrams, consider breaking them into multiple simpler diagrams instead of creating one overly complex diagram. If you must create a complex diagram:
+  • Use clear grouping and hierarchies
+  • Limit nesting depth (maximum 3 levels for PlantUML packages)
+  • Use aliases for long component names
+  • Test with simpler versions first
+  • Avoid mixing too many colors or styles
+  • Focus on the most important relationships and components
+  • Consider splitting into logical sub-diagrams (e.g., separate frontend, backend, and data layers)`
 };
 
 /**
@@ -87,8 +94,14 @@ const DOMAIN_CONTEXTS: Record<string, ContextEnhancement> = {
     specificInstructions: [
       'Show clear component boundaries',
       'Indicate data flow direction',
-      'Group related components',
-      'Show important dependencies and interfaces'
+      'Group related components logically',
+      'Show important dependencies and interfaces',
+      'For complex architectures, focus on one layer or aspect at a time',
+      'Use simple component names without special characters',
+      'Limit package nesting to 3 levels maximum',
+      'Consider creating separate diagrams for different architectural views (e.g., logical, physical, deployment)',
+      'Use consistent naming conventions across all components',
+      'Prioritize readability over comprehensive coverage - omit less critical details'
     ]
   },
   workflow: {

@@ -118,50 +118,69 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
     syntaxGuidelines: [
       'Start with @startuml and end with @enduml',
       'Use skinparam for global styling: skinparam packageBackgroundColor LightYellow',
-      'Use !theme directive for predefined themes: !theme plain',
+      'AVOID !theme directive - it may cause compatibility issues with some Kroki versions',
+      'Use only safe, standard colors: White, LightGray, LightBlue, LightGreen, LightYellow, LightSalmon, LightCyan, LightPink',
       'Class diagrams: class ClassName { fields, methods }',
       'Sequence diagrams: Actor -> Object : message',
-      'Component diagrams: [Component] as alias',
+      'Component diagrams: [Component] as alias - use simple names without special characters',
       'Package styling: package "Name" #LightBlue { ... }',
       'Use -- for associations, --> for dependencies',
       'Comments start with \' or //',
+      'Keep component names simple: [UserService] not [/_complex-name_/]',
       'AVOID !define - use skinparam or inline colors instead'
     ],
     bestPractices: [
-      'Use meaningful names for classes and components',
-      'Group related elements with packages',
+      'Use meaningful but simple names for classes and components',
+      'Group related elements with packages, but avoid excessive nesting (max 3 levels)',
       'Use standard stereotypes: <<interface>>, <<abstract>>, <<entity>>',
       'Apply colors directly: package "Name" #LightYellow { ... }',
       'Use skinparam for consistent global styling',
-      'Use notes to add important documentation',
-      'Keep diagrams focused on specific aspects',
-      'Use proper UML relationship types'
+      'Use notes to add important documentation, but keep them concise',
+      'Keep diagrams focused on specific aspects - split complex diagrams into multiple simpler ones',
+      'Use proper UML relationship types',
+      'Prefer standard PlantUML colors over custom color names',
+      'Test with simple diagrams first, then add complexity gradually',
+      'Use aliases for long component names: [VeryLongComponentName] as VLC'
     ],
     commonPitfalls: [
       'DO NOT forget @startuml/@enduml tags',
       'DO NOT use !define for colors - use skinparam or inline colors',
+      'DO NOT use !theme directive - it may cause compatibility issues with Kroki',
       'DO NOT use custom colors in stereotypes like <<CUSTOMCOLOR>>',
       'DO NOT mix diagram types in single diagram',
       'DO NOT use invalid UML relationship syntax',
-      'DO NOT create overly complex single diagrams',
+      'DO NOT create overly complex single diagrams - split into multiple diagrams',
       'DO NOT use spaces in entity names without quotes',
-      'DO NOT use <<COLORNAME>> as stereotypes - use standard UML stereotypes only'
+      'DO NOT use <<COLORNAME>> as stereotypes - use standard UML stereotypes only',
+      'DO NOT use special characters in component names like [/_index] - use [Index] instead',
+      'DO NOT nest packages more than 3 levels deep',
+      'DO NOT use obscure color names - stick to standard ones: LightBlue, LightGreen, etc.',
+      'DO NOT create diagrams with more than 20-30 components without grouping',
+      'DO NOT use complex skinparam combinations that might not be supported',
+      'DO NOT mix too many different background colors in a single diagram'
     ],
     examplePatterns: [
       '@startuml\nskinparam packageBackgroundColor LightYellow\nclass User {\n  +name: String\n  +login()\n}\nUser --> Order\n@enduml',
       '@startuml\nactor User\nUser -> System : authenticate\nSystem --> User : token\n@enduml',
-      '@startuml\npackage "Core" #LightBlue {\n  [UserService]\n  [AuthService]\n}\n@enduml',
-      '@startuml\nskinparam packageBackgroundColor LightGreen\nskinparam componentBackgroundColor LightYellow\npackage "Frontend" {\n  [UI] <<interface>>\n}\n@enduml'
+      '@startuml\npackage "Core" #LightBlue {\n  [UserService] as US\n  [AuthService] as AS\n}\nUS --> AS\n@enduml',
+      '@startuml\nskinparam componentBackgroundColor LightGreen\npackage "Frontend" #LightCyan {\n  [WebUI] <<interface>>\n  [Router]\n}\npackage "Backend" #LightYellow {\n  [API]\n  [Database]\n}\n[WebUI] --> [API]\n@enduml',
+      '@startuml\ntitle Simple Component Architecture\nskinparam packageBackgroundColor LightGray\npackage "Application Layer" {\n  [Controller]\n  [Service]\n}\npackage "Data Layer" {\n  [Repository]\n}\n[Controller] --> [Service]\n[Service] --> [Repository]\n@enduml'
     ],
     outputSpecifications: [
       'Output ONLY the PlantUML code without markdown wrapper',
       'Always include @startuml at the beginning',
       'Always include @enduml at the end',
-      'Use skinparam for styling, not !define',
+      'Use skinparam for styling, not !define or !theme',
       'Use inline package colors: package "Name" #Color { ... }',
       'Use only standard UML stereotypes in << >>',
       'Use proper UML syntax and relationships',
-      'Ensure all referenced entities are defined'
+      'Ensure all referenced entities are defined',
+      'Keep component names simple without special characters',
+      'Use standard colors: LightBlue, LightGreen, LightYellow, LightGray, LightCyan, LightPink, LightSalmon',
+      'Avoid excessive nesting - maximum 3 package levels',
+      'If diagram becomes too complex, suggest splitting into multiple simpler diagrams',
+      'Use aliases for long names: [LongComponentName] as LCN',
+      'Test compatibility - start simple and add complexity gradually'
     ]
   },
 

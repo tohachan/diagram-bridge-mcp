@@ -1,10 +1,10 @@
 import { 
-  DiagramFormat, 
   InstructionTemplateVariables, 
   FormatInstructionTemplate,
   ContextEnhancement 
 } from '../types/diagram-instructions.js';
-import { FORMAT_INSTRUCTION_TEMPLATES } from '../resources/diagram-instructions-config.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
+import { getFormatInstructionTemplate } from '../utils/format-validation.js';
 
 /**
  * Main instruction template for diagram code generation
@@ -132,7 +132,7 @@ export class DiagramInstructionTemplate {
       additionalGuidance = []
     } = variables;
 
-    const template = FORMAT_INSTRUCTION_TEMPLATES[diagramFormat];
+    const template = getFormatInstructionTemplate(diagramFormat);
     
     if (!template) {
       throw new Error(`Unsupported diagram format: ${diagramFormat}`);
@@ -280,7 +280,7 @@ export class DiagramInstructionTemplate {
       errors.push('Diagram format is required');
     }
 
-    if (variables.diagramFormat && !FORMAT_INSTRUCTION_TEMPLATES[variables.diagramFormat]) {
+    if (variables.diagramFormat && !getFormatInstructionTemplate(variables.diagramFormat)) {
       errors.push(`Unsupported diagram format: ${variables.diagramFormat}`);
     }
 

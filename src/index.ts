@@ -7,6 +7,11 @@ import { DiagramSelectionHandler } from './resources/diagram-selection-handler.j
 import { DiagramInstructionsHandler } from './resources/diagram-instructions-handler.js';
 import { KrokiRenderingHandler, ProcessingError } from './resources/kroki-rendering-handler.js';
 import { getDiagramFilePath } from './utils/file-path.js';
+import { 
+  createDiagramSelectionInputSchema,
+  createDiagramInstructionsInputSchema,
+  createDiagramRenderingInputSchema 
+} from './utils/schema-generation.js';
 
 /**
  * Diagram Bridge MCP Server
@@ -30,15 +35,7 @@ server.registerTool(
   {
     title: 'Help Choose Diagram Format',
     description: 'Generate structured prompts for automated diagram format selection based on user requirements',
-    inputSchema: {
-      user_request: z.string()
-        .min(5, 'User request must be at least 5 characters')
-        .max(1000, 'User request must not exceed 1000 characters')
-        .describe('User\'s visualization request describing what they want to diagram'),
-      available_formats: z.array(z.enum(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd']))
-        .optional()
-        .describe('Optional array of available diagram formats to choose from')
-    }
+    inputSchema: createDiagramSelectionInputSchema()
   },
   async ({ user_request, available_formats }) => {
     try {
@@ -71,14 +68,7 @@ server.registerTool(
   {
     title: 'Get Diagram Instructions',
     description: 'Generate format-specific instruction prompts to help LLMs create syntactically correct diagram code',
-    inputSchema: {
-      user_request: z.string()
-        .min(5, 'User request must be at least 5 characters')
-        .max(2000, 'User request must not exceed 2000 characters')
-        .describe('Original natural language request describing what diagram to create'),
-      diagram_format: z.enum(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'])
-        .describe('Target diagram language/format')
-    }
+    inputSchema: createDiagramInstructionsInputSchema()
   },
   async ({ user_request, diagram_format }) => {
     try {
@@ -111,17 +101,7 @@ server.registerTool(
   {
     title: 'Render Diagram',
     description: 'Render diagram source code into an image using Kroki service',
-    inputSchema: {
-      code: z.string()
-        .min(1, 'Diagram code is required')
-        .max(100000, 'Diagram code must not exceed 100,000 characters')
-        .describe('The source code of the diagram to render'),
-      diagram_format: z.enum(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'])
-        .describe('The format of the diagram source code'),
-      output_format: z.enum(['png', 'svg'])
-        .optional()
-        .describe('The desired output image format (defaults to the first supported format for the diagram type)')
-    }
+    inputSchema: createDiagramRenderingInputSchema()
   },
   async ({ code, diagram_format, output_format }) => {
     try {

@@ -2,12 +2,7 @@
  * Type definitions for diagram code generation instructions
  */
 
-export type DiagramFormat = 
-  | 'mermaid'
-  | 'plantuml'
-  | 'd2'
-  | 'graphviz'
-  | 'erd';
+import type { DiagramFormat } from './diagram-selection.js';
 
 /**
  * Input schema for the get_diagram_instructions MCP resource

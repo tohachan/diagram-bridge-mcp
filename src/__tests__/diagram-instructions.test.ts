@@ -1,7 +1,7 @@
 import { DiagramInstructionsHandler } from '../resources/diagram-instructions-handler.js';
 import { DiagramInstructionsValidator } from '../utils/instruction-validation.js';
 import { DiagramInstructionTemplate } from '../templates/instruction-template.js';
-import { DiagramFormat } from '../types/diagram-instructions.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
 
 describe('Diagram Instructions System', () => {
   let handler: DiagramInstructionsHandler;
@@ -67,7 +67,7 @@ describe('Diagram Instructions System', () => {
 
       const validation = validator.validateInput(input);
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('diagram_format must be one of: mermaid, plantuml, d2, graphviz, erd');
+      expect(validation.errors).toContain('Unsupported format: invalid');
     });
 
     it('should reject missing user_request', () => {
@@ -143,7 +143,7 @@ describe('Diagram Instructions System', () => {
       
       expect(prompt).toContain('D2 Diagram Code Generation Instructions');
       expect(prompt).toContain('Show system architecture');
-      expect(prompt).toContain('object.property syntax');
+      expect(prompt).toContain('hierarchical dot notation');
     });
 
     it('should generate GraphViz instructions', () => {
@@ -154,7 +154,7 @@ describe('Diagram Instructions System', () => {
 
       const prompt = templateEngine.generateInstructionPrompt(variables);
       
-      expect(prompt).toContain('GraphViz (DOT) Diagram Code Generation Instructions');
+      expect(prompt).toContain('GraphViz Diagram Code Generation Instructions');
       expect(prompt).toContain('Visualize dependencies');
       expect(prompt).toContain('digraph');
     });
@@ -167,7 +167,7 @@ describe('Diagram Instructions System', () => {
 
       const prompt = templateEngine.generateInstructionPrompt(variables);
       
-      expect(prompt).toContain('Entity Relationship Diagram');
+      expect(prompt).toContain('ERD Diagram Code Generation Instructions');
       expect(prompt).toContain('Database schema for e-commerce');
       expect(prompt).toContain('primary key');
       expect(prompt).toContain('foreign key');
@@ -268,7 +268,7 @@ describe('Diagram Instructions System', () => {
         diagram_format: 'unsupported' as DiagramFormat
       };
 
-      await expect(handler.processRequest(input)).rejects.toThrow('diagram_format must be one of');
+      await expect(handler.processRequest(input)).rejects.toThrow('Unsupported format: unsupported');
     });
 
     it('should pass health check', async () => {
@@ -296,10 +296,13 @@ describe('Diagram Instructions System', () => {
       const template = handler.getFormatTemplate('mermaid');
       
       expect(template).toBeDefined();
-      expect(template.format).toBe('mermaid');
-      expect(template.displayName).toBe('Mermaid');
-      expect(template.syntaxGuidelines).toBeDefined();
-      expect(template.bestPractices).toBeDefined();
+      expect(template).not.toBeNull();
+      if (template) {
+        expect(template.format).toBe('mermaid');
+        expect(template.displayName).toBe('Mermaid');
+        expect(template.syntaxGuidelines).toBeDefined();
+        expect(template.bestPractices).toBeDefined();
+      }
     });
   });
 
@@ -343,7 +346,7 @@ describe('Diagram Instructions System', () => {
       const complexResult = await handler.processRequest(complexInput);
       
       expect(simpleResult.prompt_text).toContain('clarity and simplicity');
-      expect(complexResult.prompt_text).toContain('advanced');
+      expect(complexResult.prompt_text).toContain('breaking them into multiple simpler diagrams');
     });
   });
 }); 

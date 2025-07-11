@@ -11,6 +11,7 @@ import { KrokiHttpClient } from '../clients/kroki-client.js';
 import { DiagramLRUCache } from '../utils/diagram-cache.js';
 import { isFormatOutputSupported, getDefaultOutputFormat } from '../resources/diagram-rendering-format-mapping.js';
 import { getDiagramFilePath, ensureDiagramStorageDirectory } from '../utils/file-path.js';
+import { getSupportedDiagramFormats } from '../utils/format-validation.js';
 
 /**
  * Main handler for the render_diagram MCP tool
@@ -252,7 +253,7 @@ export class KrokiRenderingHandler {
       krokiConnection?: { connected: boolean; responseTime: number };
     } = {
       cacheStats,
-      supportedFormats: 5 // mermaid, plantuml, d2, graphviz, erd
+      supportedFormats: getSupportedDiagramFormats().length
     };
 
     if (processingTime !== undefined) {

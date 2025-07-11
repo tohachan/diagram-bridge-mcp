@@ -1,5 +1,5 @@
 import { DiagramFormat, DiagramFormatCharacteristics, PromptTemplateVariables, FormatSelectionHeuristic } from '../types/diagram-selection.js';
-import { DIAGRAM_FORMAT_DEFINITIONS } from '../resources/diagram-selection-config.js';
+import { getSupportedDiagramFormats, getFormatConfiguration } from '../utils/format-validation.js';
 
 /**
  * Main prompt template for diagram format selection
@@ -98,7 +98,10 @@ export class DiagramSelectionPromptTemplate {
     }
 
     const formatNames = availableFormats
-      .map(format => DIAGRAM_FORMAT_DEFINITIONS[format].displayName)
+      .map(format => {
+        const config = getFormatConfiguration(format);
+        return config?.displayName || format;
+      })
       .join(', ');
 
     return `The following formats are available for this request: ${formatNames}`;
@@ -160,7 +163,8 @@ export class DiagramSelectionPromptTemplate {
    */
   private generateRecommendationAnalysis(recommendation: FormatSelectionHeuristic): string {
     const confidencePercent = Math.round(recommendation.confidence * 100);
-    const formatName = DIAGRAM_FORMAT_DEFINITIONS[recommendation.format].displayName;
+    const config = getFormatConfiguration(recommendation.format);
+    const formatName = config?.displayName || recommendation.format;
 
     return RECOMMENDATION_ANALYSIS_TEMPLATE
       .replace('{format}', formatName)
@@ -173,7 +177,10 @@ export class DiagramSelectionPromptTemplate {
    */
   generateQuickPrompt(userRequest: string, availableFormats?: DiagramFormat[]): string {
     const formatsText = availableFormats 
-      ? availableFormats.map(f => DIAGRAM_FORMAT_DEFINITIONS[f].displayName).join(', ')
+      ? availableFormats.map(f => {
+          const config = getFormatConfiguration(f);
+          return config?.displayName || f;
+        }).join(', ')
       : 'Mermaid, PlantUML, D2, GraphViz, ERD';
 
     return `Choose the best diagram format for this request: "${userRequest}"
@@ -217,7 +224,7 @@ Recommend the most suitable format with a brief explanation.`;
     }
 
     // Validate available formats are supported
-    const supportedFormats = Object.keys(DIAGRAM_FORMAT_DEFINITIONS) as DiagramFormat[];
+    const supportedFormats = getSupportedDiagramFormats();
     const invalidFormats = variables.availableFormats.filter(format => 
       !supportedFormats.includes(format)
     );

@@ -1,4 +1,5 @@
-import { DiagramFormat, FormatInstructionTemplate } from '../types/diagram-instructions.js';
+import { FormatInstructionTemplate } from '../types/diagram-instructions.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
 
 /**
  * MCP Resource Configuration for get_diagram_instructions

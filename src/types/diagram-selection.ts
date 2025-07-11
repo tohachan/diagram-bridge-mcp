@@ -1,12 +1,9 @@
 /**
- * Supported diagram formats and their characteristics
+ * Diagram format identifier
+ * Changed from union type to string to support dynamic format discovery
+ * Use runtime validation functions from format-validation.ts for type safety
  */
-export type DiagramFormat = 
-  | 'mermaid'
-  | 'plantuml'
-  | 'd2'
-  | 'graphviz'
-  | 'erd';
+export type DiagramFormat = string;
 
 /**
  * Input schema for the help_choose_diagram MCP resource

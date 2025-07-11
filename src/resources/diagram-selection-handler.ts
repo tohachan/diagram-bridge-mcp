@@ -4,10 +4,14 @@ import {
   PromptTemplateVariables,
   DiagramFormat
 } from '../types/diagram-selection.js';
-import { DIAGRAM_FORMAT_DEFINITIONS } from './diagram-selection-config.js';
 import { FormatSelectionAnalyzer } from '../utils/selection-heuristics.js';
 import { DiagramSelectionPromptTemplate } from '../templates/prompt-template.js';
 import { DiagramSelectionValidator } from '../utils/validation.js';
+import { 
+  getSupportedDiagramFormats,
+  getFormatConfiguration,
+  getFormatCharacteristics
+} from '../utils/format-validation.js';
 
 /**
  * Main handler for the help_choose_diagram MCP resource
@@ -48,7 +52,19 @@ export class DiagramSelectionHandler {
       const recommendations = this.analyzer.analyzeRequest(input.user_request, availableFormats);
       
       // Get format descriptions for available formats
-      const formatDescriptions = availableFormats.map(format => DIAGRAM_FORMAT_DEFINITIONS[format]);
+      const formatDescriptions = availableFormats.map(format => {
+        const config = getFormatConfiguration(format);
+        const characteristics = getFormatCharacteristics(format);
+        return config ? {
+          name: format,
+          displayName: config.displayName,
+          description: config.description,
+          strengths: characteristics?.strengths || [],
+          weaknesses: characteristics?.weaknesses || [],
+          bestFor: characteristics?.bestFor || [],
+          examples: characteristics?.examples || []
+        } : null;
+      }).filter(desc => desc !== null);
       
       // Prepare template variables
       const templateVariables: PromptTemplateVariables = {
@@ -82,21 +98,27 @@ export class DiagramSelectionHandler {
    * Generate a quick response for explicit format preferences
    */
   private generateQuickResponse(userRequest: string, preferredFormat: DiagramFormat): DiagramSelectionOutput {
-    const formatInfo = DIAGRAM_FORMAT_DEFINITIONS[preferredFormat];
+    const formatConfig = getFormatConfiguration(preferredFormat);
+    const formatCharacteristics = getFormatCharacteristics(preferredFormat);
+    
+    if (!formatConfig || !formatCharacteristics) {
+      // Fallback if format configuration is not found
+      return this.generateFallbackResponse(userRequest, [preferredFormat]);
+    }
     
     const quickPrompt = `# Diagram Format Selection - Direct Preference Detected
 
 You mentioned "${preferredFormat}" in your request: "${userRequest}"
 
-## Selected Format: ${formatInfo.displayName}
-**Description:** ${formatInfo.description}
+## Selected Format: ${formatConfig.displayName}
+**Description:** ${formatConfig.description}
 
 **Why this format is suitable:**
-${formatInfo.strengths.map(strength => `- ${strength}`).join('\n')}
+${formatCharacteristics.strengths.map((strength: string) => `- ${strength}`).join('\n')}
 
-**Your format choice is confirmed.** Proceed with ${formatInfo.displayName} for your diagram.
+**Your format choice is confirmed.** Proceed with ${formatConfig.displayName} for your diagram.
 
-**Quick tip:** ${formatInfo.bestFor[0] || 'This format is well-suited for your needs'}.`;
+**Quick tip:** ${formatCharacteristics.bestFor[0] || 'This format is well-suited for your needs'}.`;
 
     return {
       prompt_text: quickPrompt
@@ -118,7 +140,7 @@ ${formatInfo.strengths.map(strength => `- ${strength}`).join('\n')}
    * Get all supported diagram formats
    */
   private getAllSupportedFormats(): DiagramFormat[] {
-    return Object.keys(DIAGRAM_FORMAT_DEFINITIONS) as DiagramFormat[];
+    return getSupportedDiagramFormats();
   }
 
   /**
@@ -152,10 +174,22 @@ ${formatInfo.strengths.map(strength => `- ${strength}`).join('\n')}
       }
 
       // Test template engine
+      const testFormatConfig = getFormatConfiguration('mermaid');
+      const testFormatCharacteristics = getFormatCharacteristics('mermaid');
+      const testFormatDescription = testFormatConfig && testFormatCharacteristics ? {
+        name: 'mermaid',
+        displayName: testFormatConfig.displayName,
+        description: testFormatConfig.description,
+        strengths: testFormatCharacteristics.strengths,
+        weaknesses: testFormatCharacteristics.weaknesses,
+        bestFor: testFormatCharacteristics.bestFor,
+        examples: testFormatCharacteristics.examples
+      } : null;
+
       const templateVars: PromptTemplateVariables = {
         userRequest: 'test',
         availableFormats: ['mermaid'],
-        formatDescriptions: [DIAGRAM_FORMAT_DEFINITIONS.mermaid],
+        formatDescriptions: testFormatDescription ? [testFormatDescription] : [],
         selectionHeuristics: []
       };
 
@@ -206,13 +240,23 @@ ${formatInfo.strengths.map(strength => `- ${strength}`).join('\n')}
    * Get detailed information about supported formats
    */
   getFormatCatalog() {
-    return Object.entries(DIAGRAM_FORMAT_DEFINITIONS).map(([format, details]) => ({
-      format: format as DiagramFormat,
-      displayName: details.displayName,
-      description: details.description,
-      strengths: details.strengths,
-      bestFor: details.bestFor,
-      examples: details.examples
-    }));
+    const supportedFormats = getSupportedDiagramFormats();
+    return supportedFormats.map(format => {
+      const config = getFormatConfiguration(format);
+      const characteristics = getFormatCharacteristics(format);
+      
+      if (!config || !characteristics) {
+        return null;
+      }
+      
+      return {
+        format: format as DiagramFormat,
+        displayName: config.displayName,
+        description: config.description,
+        strengths: characteristics.strengths,
+        bestFor: characteristics.bestFor,
+        examples: characteristics.examples
+      };
+    }).filter(entry => entry !== null);
   }
 } 

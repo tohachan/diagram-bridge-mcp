@@ -1,12 +1,15 @@
 import { 
   DiagramInstructionsInput, 
   DiagramInstructionsOutput, 
-  InstructionTemplateVariables,
-  DiagramFormat
+  InstructionTemplateVariables
 } from '../types/diagram-instructions.js';
-import { FORMAT_INSTRUCTION_TEMPLATES } from './diagram-instructions-config.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
 import { DiagramInstructionTemplate } from '../templates/instruction-template.js';
 import { DiagramInstructionsValidator } from '../utils/instruction-validation.js';
+import { 
+  getSupportedDiagramFormats,
+  getFormatInstructionTemplate 
+} from '../utils/format-validation.js';
 
 /**
  * Main handler for the get_diagram_instructions MCP resource
@@ -178,7 +181,7 @@ export class DiagramInstructionsHandler {
    * Get format template information
    */
   getFormatTemplate(format: DiagramFormat) {
-    return FORMAT_INSTRUCTION_TEMPLATES[format];
+    return getFormatInstructionTemplate(format);
   }
 
   /**

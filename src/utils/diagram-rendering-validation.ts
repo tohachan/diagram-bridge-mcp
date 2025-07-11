@@ -8,10 +8,13 @@ import {
 } from '../types/diagram-rendering.js';
 import { DiagramFormat } from '../types/diagram-selection.js';
 import { 
-  isFormatOutputSupported, 
+  isValidDiagramFormat, 
+  getSupportedDiagramFormats,
+  validateDiagramFormatWithDetails,
+  isOutputFormatSupported,
   getSupportedOutputFormats,
   getDefaultOutputFormat
-} from '../resources/diagram-rendering-format-mapping.js';
+} from './format-validation.js';
 
 /**
  * Input validation utility for diagram rendering
@@ -19,7 +22,6 @@ import {
 export class DiagramRenderingValidator {
   private readonly MAX_CODE_LENGTH = 100000;
   private readonly MIN_CODE_LENGTH = 1;
-  private readonly SUPPORTED_FORMATS: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'];
   private readonly SUPPORTED_OUTPUT_FORMATS: OutputFormat[] = ['png', 'svg'];
 
   /**
@@ -116,13 +118,9 @@ export class DiagramRenderingValidator {
       return errors;
     }
 
-    if (typeof diagramFormat !== 'string') {
-      errors.push('diagram_format must be a string');
-      return errors;
-    }
-
-    if (!this.SUPPORTED_FORMATS.includes(diagramFormat as DiagramFormat)) {
-      errors.push(`Unsupported diagram format: ${diagramFormat}. Supported formats: ${this.SUPPORTED_FORMATS.join(', ')}`);
+    const validationResult = validateDiagramFormatWithDetails(diagramFormat);
+    if (!validationResult.isValid) {
+      errors.push(validationResult.error || 'Invalid diagram format');
     }
 
     return errors;
@@ -172,10 +170,14 @@ export class DiagramRenderingValidator {
    * Sanitize and normalize user input
    */
   sanitizeInput(input: DiagramRenderingInput): DiagramRenderingInput {
+    // Get default output format if not provided
+    const defaultOutput = getDefaultOutputFormat(input.diagram_format);
+    const outputFormat = input.output_format || defaultOutput || 'png'; // fallback to png
+    
     const result: DiagramRenderingInput = {
       code: this.sanitizeCode(input.code),
       diagram_format: input.diagram_format,
-      output_format: input.output_format || getDefaultOutputFormat(input.diagram_format)
+      output_format: outputFormat
     };
     
     return result;
@@ -221,21 +223,14 @@ export class DiagramRenderingValidator {
 
   /**
    * Validate format-output combination compatibility
+   * Now uses dynamic format discovery instead of hardcoded restrictions
    */
   validateFormatOutputCombination(format: DiagramFormat, outputFormat: OutputFormat): ValidationResult {
     const errors: string[] = [];
 
-    // Most formats support both PNG and SVG, but some have limitations
-    const formatRestrictions: Record<DiagramFormat, OutputFormat[]> = {
-      mermaid: ['png', 'svg'],
-      plantuml: ['png', 'svg'],
-      d2: ['png', 'svg'],
-      graphviz: ['png', 'svg'],
-      erd: ['png', 'svg'] // ERD typically supports both formats
-    };
-
-    const supportedOutputs = formatRestrictions[format];
-    if (supportedOutputs && !supportedOutputs.includes(outputFormat)) {
+    // Use dynamic format discovery to check compatibility
+    if (!isOutputFormatSupported(format, outputFormat)) {
+      const supportedOutputs = getSupportedOutputFormats(format);
       errors.push(`Format ${format} does not support ${outputFormat} output. Supported outputs: ${supportedOutputs.join(', ')}`);
     }
 

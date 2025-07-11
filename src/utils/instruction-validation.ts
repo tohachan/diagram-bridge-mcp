@@ -1,5 +1,11 @@
-import { DiagramFormat, DiagramInstructionsInput, ValidationResult } from '../types/diagram-instructions.js';
-import { FORMAT_INSTRUCTION_TEMPLATES } from '../resources/diagram-instructions-config.js';
+import { DiagramInstructionsInput, ValidationResult } from '../types/diagram-instructions.js';
+import { DiagramFormat } from '../types/diagram-selection.js';
+import { 
+  isValidDiagramFormat, 
+  getSupportedDiagramFormats,
+  validateDiagramFormatWithDetails,
+  getFormatInstructionTemplate
+} from './format-validation.js';
 
 /**
  * Input validation utility for diagram instructions
@@ -97,15 +103,9 @@ export class DiagramInstructionsValidator {
       return errors;
     }
 
-    if (typeof diagramFormat !== 'string') {
-      errors.push('diagram_format must be a string');
-      return errors;
-    }
-
-    const supportedFormats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'];
-    
-    if (!supportedFormats.includes(diagramFormat as DiagramFormat)) {
-      errors.push(`diagram_format must be one of: ${supportedFormats.join(', ')}`);
+    const validationResult = validateDiagramFormatWithDetails(diagramFormat);
+    if (!validationResult.isValid) {
+      errors.push(validationResult.error || 'Invalid diagram format');
     }
 
     return errors;
@@ -161,15 +161,17 @@ export class DiagramInstructionsValidator {
 
   /**
    * Validate that template exists for the given format
+   * Now uses dynamic format discovery
    */
   validateFormatSupport(format: DiagramFormat): boolean {
-    return format in FORMAT_INSTRUCTION_TEMPLATES;
+    const template = getFormatInstructionTemplate(format);
+    return template !== undefined;
   }
 
   /**
    * Get all supported formats
    */
   getSupportedFormats(): DiagramFormat[] {
-    return Object.keys(FORMAT_INSTRUCTION_TEMPLATES) as DiagramFormat[];
+    return getSupportedDiagramFormats();
   }
 } 

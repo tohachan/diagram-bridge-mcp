@@ -1,5 +1,9 @@
 import { DiagramFormat, DiagramSelectionInput, ValidationResult } from '../types/diagram-selection.js';
-import { DIAGRAM_FORMAT_DEFINITIONS } from '../resources/diagram-selection-config.js';
+import { 
+  isValidDiagramFormat, 
+  getSupportedDiagramFormats,
+  validateDiagramFormats 
+} from './format-validation.js';
 
 /**
  * Input validation utility for diagram selection
@@ -100,8 +104,8 @@ export class DiagramSelectionValidator {
       return errors;
     }
 
-    // Check for valid format strings
-    const supportedFormats = Object.keys(DIAGRAM_FORMAT_DEFINITIONS) as DiagramFormat[];
+    // Use runtime validation to check format validity
+    const supportedFormats = getSupportedDiagramFormats();
     const invalidFormats: unknown[] = [];
     const duplicates: string[] = [];
     const seen = new Set<string>();
@@ -112,7 +116,7 @@ export class DiagramSelectionValidator {
         continue;
       }
 
-      if (!supportedFormats.includes(format as DiagramFormat)) {
+      if (!isValidDiagramFormat(format)) {
         invalidFormats.push(format);
         continue;
       }
@@ -185,10 +189,8 @@ export class DiagramSelectionValidator {
    * Sanitize and deduplicate available formats
    */
   private sanitizeAvailableFormats(formats: DiagramFormat[]): DiagramFormat[] {
-    const supportedFormats = Object.keys(DIAGRAM_FORMAT_DEFINITIONS) as DiagramFormat[];
-    
-    // Filter to only supported formats and remove duplicates
-    const validFormats = formats.filter(format => supportedFormats.includes(format));
+    // Use runtime validation to filter supported formats and remove duplicates
+    const validFormats = validateDiagramFormats(formats);
     
     return Array.from(new Set(validFormats));
   }

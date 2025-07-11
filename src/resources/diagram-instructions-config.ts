@@ -278,41 +278,294 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
     format: 'erd',
     displayName: 'Entity Relationship Diagram',
     syntaxGuidelines: [
-      'Define entities with attributes: User { id, name, email }',
-      'Show relationships with cardinality: User ||--o{ Order',
-      'Use proper ERD notation for relationships',
-      'Define primary keys: id PK',
-      'Define foreign keys: user_id FK',
-      'Add indexes when relevant: email "unique"',
-      'Use meaningful entity and attribute names'
+      'Define entities: [EntityName]',
+      'Add attributes: EntityName { attribute1, attribute2 }',
+      'Define relationships: Entity1 ||--o{ Entity2 : "relationship"',
+      'Use cardinality symbols: ||--o{ (one-to-many), }o--|| (many-to-one)',
+      'Add relationship labels with quotes',
+      'Use proper ERD notation for keys and attributes',
+      'Comments start with %%'
     ],
     bestPractices: [
-      'Use clear, descriptive entity names',
-      'Define all primary and foreign keys',
-      'Show relationship cardinalities accurately',
-      'Group related entities visually',
-      'Use standard ERD notation',
-      'Include important attributes only'
+      'Use meaningful entity and attribute names',
+      'Define primary keys explicitly',
+      'Show cardinality relationships clearly',
+      'Group related entities logically',
+      'Use consistent naming conventions',
+      'Add relationship descriptions'
     ],
     commonPitfalls: [
-      'DO NOT mix ERD notation styles',
-      'DO NOT omit cardinality specifications',
-      'DO NOT create many-to-many without junction tables',
-      'DO NOT use technical column types unless necessary',
-      'DO NOT ignore foreign key relationships',
-      'DO NOT overcomplicate with too many attributes'
+      'DO NOT forget entity definitions',
+      'DO NOT use incorrect cardinality symbols',
+      'DO NOT mix different ERD notations',
+      'DO NOT create overly complex single diagrams',
+      'DO NOT ignore primary key specifications',
+      'DO NOT use inconsistent naming patterns'
     ],
     examplePatterns: [
-      'User {\n  id PK\n  email "unique"\n  name\n}\nUser ||--o{ Order',
-      'Customer ||--o{ Order {\n  id PK\n  customer_id FK\n  order_date\n}',
-      'Product }o--|| Category\nProduct {\n  id PK\n  name\n  category_id FK\n}'
+      'erDiagram\n  CUSTOMER ||--o{ ORDER : places\n  ORDER ||--|{ LINE-ITEM : contains\n  PRODUCT ||--o{ LINE-ITEM : ordered',
+      'erDiagram\n  USER {\n    int id\n    string name\n    string email\n  }\n  USER ||--o{ POST : creates',
+      'erDiagram\n  AUTHOR ||--o{ BOOK : writes\n  BOOK }o--|| PUBLISHER : published_by'
     ],
     outputSpecifications: [
       'Output ONLY the ERD code without markdown wrapper',
-      'Use consistent relationship notation',
-      'Define all entities with their attributes',
-      'Show all relevant relationships',
-      'Use proper cardinality symbols'
+      'Start with erDiagram declaration',
+      'Use proper cardinality notation',
+      'Define entities and relationships clearly',
+      'Include meaningful relationship labels'
+    ]
+  },
+
+  bpmn: {
+    format: 'bpmn',
+    displayName: 'BPMN',
+    syntaxGuidelines: [
+      'Use proper BPMN 2.0 XML format with ALL required namespaces',
+      'Start with XML declaration: <?xml version="1.0" encoding="UTF-8"?>',
+      'Include ALL namespaces: bpmn, bpmndi, dc, di with proper URLs',
+      'Add targetNamespace="http://bpmn.io/schema/bpmn" and id="Definitions_1"',
+      'Create bpmn:process element with isExecutable="false"',
+      'Use standard BPMN elements: startEvent, task, exclusiveGateway, endEvent',
+      'Connect elements with sequenceFlow using sourceRef/targetRef attributes',
+      'MANDATORY: Include bpmndi:BPMNDiagram section with visual information',
+      'Add bpmndi:BPMNShape for each element with dc:Bounds coordinates',
+      'Add bpmndi:BPMNEdge for each flow with di:waypoint coordinates',
+      'DO NOT use XML comments <!-- --> - they cause parsing errors'
+    ],
+    bestPractices: [
+      'Start with simple single-process diagrams',
+      'Use clear, descriptive names for tasks and events',
+      'Keep process flows linear and easy to follow',
+      'Use exclusiveGateway for simple decision points',
+      'Ensure all elements have unique IDs',
+      'Test with simple examples before adding complexity',
+      'Focus on single participant processes',
+      'Use proper BPMN 2.0 element structure',
+      'Use one gateway per decision point - avoid reusing gateways',
+      'Create clear linear paths without complex cycles',
+      'Validate that every element has proper incoming/outgoing flows',
+      'Design for readability - complex processes can be split into multiple diagrams if needed'
+    ],
+    commonPitfalls: [
+      'DO NOT request PNG format - BPMN only supports SVG output',
+      'DO NOT use collaboration and messageFlow - causes validation errors',
+      'DO NOT create multiple processes in single diagram',
+      'DO NOT use complex gateway combinations',
+      'DO NOT forget to connect elements with sequenceFlow',
+      'DO NOT use special characters in element IDs',
+      'DO NOT create processes without start/end events',
+      'DO NOT use unsupported BPMN elements',
+      'DO NOT overcomplicate simple workflows',
+      'DO NOT use XML comments <!-- --> - they break parsing',
+      'DO NOT create complex loops or cycles - they cause validation errors',
+      'DO NOT use same gateway for conflicting decision paths',
+      'DO NOT create elements without proper flow connections'
+    ],
+    examplePatterns: [
+      '<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n  <bpmn:process id="Process_1" isExecutable="false">\n    <bpmn:startEvent id="StartEvent_1" name="Start"/>\n    <bpmn:task id="Task_1" name="Process Request"/>\n    <bpmn:endEvent id="EndEvent_1" name="End"/>\n    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>\n    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1"/>\n  </bpmn:process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_1">\n    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">\n        <dc:Bounds x="152" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">\n        <dc:Bounds x="240" y="60" width="100" height="80"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">\n        <dc:Bounds x="392" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">\n        <di:waypoint x="188" y="100"/>\n        <di:waypoint x="240" y="100"/>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">\n        <di:waypoint x="340" y="100"/>\n        <di:waypoint x="392" y="100"/>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn:definitions>'
+    ],
+    outputSpecifications: [
+      'CRITICAL: BPMN only supports SVG output format - do not request PNG',
+      'Output ONLY valid BPMN 2.0 XML without markdown wrapper',
+      'Always include XML declaration with UTF-8 encoding',
+      'Include ALL four namespaces: bpmn, bpmndi, dc, di',
+      'Add targetNamespace and id attributes to definitions',
+      'Create single bpmn:process with isExecutable="false"',
+      'MANDATORY: Include complete bpmndi:BPMNDiagram section',
+      'Add bpmndi:BPMNShape for every element with dc:Bounds',
+      'Add bpmndi:BPMNEdge for every flow with di:waypoint',
+      'Use proper coordinate positioning for visual layout',
+      'Design comprehensive business processes as needed - complexity is supported'
+    ]
+  },
+
+  'c4-plantuml': {
+    format: 'c4-plantuml',
+    displayName: 'C4-PlantUML',
+    syntaxGuidelines: [
+      'Start with @startuml and end with @enduml',
+      'Include C4 library: !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml',
+      'Define persons: Person(alias, "Label", "Description")',
+      'Define systems: System(alias, "Label", "Description")',
+      'Define containers: Container(alias, "Label", "Technology", "Description")',
+      'Define components: Component(alias, "Label", "Technology", "Description")',
+      'Define relationships: Rel(from, to, "Label", "Technology")',
+      'Use LAYOUT_WITH_LEGEND() for automatic legend',
+      'Add titles with title'
+    ],
+    bestPractices: [
+      'Use appropriate C4 abstraction level',
+      'Define clear system boundaries',
+      'Use consistent naming conventions',
+      'Add meaningful descriptions',
+      'Include technology stack information',
+      'Use proper relationship labels',
+      'Apply C4 methodology principles'
+    ],
+    commonPitfalls: [
+      'DO NOT forget @startuml/@enduml tags',
+      'DO NOT mix different C4 diagram types',
+      'DO NOT omit required C4 library includes',
+      'DO NOT use invalid C4 element syntax',
+      'DO NOT create diagrams without clear scope',
+      'DO NOT ignore C4 abstraction levels',
+      'DO NOT use unclear element descriptions'
+    ],
+    examplePatterns: [
+      '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml\ntitle System Context\nPerson(user, "User", "End user")\nSystem(system, "System", "Main system")\nRel(user, system, "Uses")\nLAYOUT_WITH_LEGEND()\n@enduml',
+      '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml\ntitle Container Diagram\nContainer(web, "Web App", "React", "Frontend")\nContainer(api, "API", "Node.js", "Backend")\nRel(web, api, "Makes API calls", "HTTPS")\n@enduml',
+      '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml\ntitle Component Diagram\nComponent(ctrl, "Controller", "Class", "Handles requests")\nComponent(svc, "Service", "Class", "Business logic")\nRel(ctrl, svc, "Calls")\n@enduml'
+    ],
+    outputSpecifications: [
+      'Output ONLY the C4-PlantUML code without markdown wrapper',
+      'Always include @startuml at the beginning',
+      'Always include @enduml at the end',
+      'Include appropriate C4 library import',
+      'Use proper C4 element syntax',
+      'Define clear relationships between elements',
+      'Include title and legend when appropriate',
+      'Follow C4 methodology principles'
+    ]
+  },
+
+  structurizr: {
+    format: 'structurizr',
+    displayName: 'Structurizr',
+    syntaxGuidelines: [
+      'Define workspace: workspace { model { ... } views { ... } }',
+      'Define software systems: softwareSystem "Name" { ... }',
+      'Define containers: container "Name" { technology "Tech" }',
+      'Define components: component "Name" { technology "Tech" }',
+      'Define relationships: user -> system "Uses"',
+      'Define views: systemContext softwareSystem { ... }',
+      'Use consistent naming and descriptions',
+      'Add deployment environments when needed'
+    ],
+    bestPractices: [
+      'Use hierarchical system definition',
+      'Define clear system boundaries',
+      'Include technology stack information',
+      'Create multiple views for different perspectives',
+      'Use consistent naming conventions',
+      'Add comprehensive descriptions',
+      'Define deployment environments'
+    ],
+    commonPitfalls: [
+      'DO NOT forget workspace structure',
+      'DO NOT mix different abstraction levels',
+      'DO NOT omit required syntax elements',
+      'DO NOT use invalid Structurizr DSL syntax',
+      'DO NOT create overly complex single models',
+      'DO NOT ignore view definitions',
+      'DO NOT use unclear naming conventions'
+    ],
+    examplePatterns: [
+      'workspace {\n  model {\n    user = person "User"\n    system = softwareSystem "System" {\n      container "Web App" {\n        technology "React"\n      }\n    }\n    user -> system "Uses"\n  }\n  views {\n    systemContext system {\n      include *\n    }\n  }\n}',
+      'workspace {\n  model {\n    enterprise "Company" {\n      person "Customer"\n      softwareSystem "E-commerce" {\n        container "Frontend" {\n          technology "React"\n        }\n        container "Backend" {\n          technology "Node.js"\n        }\n      }\n    }\n  }\n}',
+      'workspace {\n  model {\n    system = softwareSystem "System" {\n      api = container "API" {\n        technology "REST API"\n        component "Controller"\n        component "Service"\n      }\n    }\n  }\n  views {\n    container system {\n      include *\n    }\n  }\n}'
+    ],
+    outputSpecifications: [
+      'Output ONLY the Structurizr DSL code without markdown wrapper',
+      'Use proper workspace structure',
+      'Define clear model hierarchy',
+      'Include technology specifications',
+      'Create appropriate views',
+      'Use consistent naming and descriptions',
+      'Follow Structurizr DSL syntax rules'
+    ]
+  },
+
+  excalidraw: {
+    format: 'excalidraw',
+    displayName: 'Excalidraw',
+    syntaxGuidelines: [
+      'Use simple JSON structure for Excalidraw elements',
+      'Define elements with type, x, y, width, height',
+      'Use element types: rectangle, ellipse, arrow, text, line',
+      'Connect elements with arrows using startBinding/endBinding',
+      'Set strokeColor and backgroundColor for styling',
+      'Use text elements for labels and descriptions',
+      'Keep coordinates and sizes reasonable',
+      'Use groupIds for related elements'
+    ],
+    bestPractices: [
+      'Keep diagrams simple and sketchy',
+      'Use hand-drawn aesthetic appropriately',
+      'Focus on concepts rather than precision',
+      'Use consistent color schemes',
+      'Group related elements together',
+      'Make text readable and appropriately sized',
+      'Use arrows to show relationships clearly'
+    ],
+    commonPitfalls: [
+      'DO NOT create overly complex JSON structures',
+      'DO NOT use precise positioning for sketchy style',
+      'DO NOT mix too many different colors',
+      'DO NOT create tiny or huge elements',
+      'DO NOT ignore element relationships',
+      'DO NOT use Excalidraw for formal documentation',
+      'DO NOT overcomplicate simple concepts'
+    ],
+    examplePatterns: [
+      '{\n  "type": "excalidraw",\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#ffffff"\n    },\n    {\n      "type": "text",\n      "x": 150,\n      "y": 130,\n      "text": "Component",\n      "fontSize": 16\n    }\n  ]\n}',
+      '{\n  "type": "excalidraw",\n  "elements": [\n    {\n      "type": "ellipse",\n      "x": 50,\n      "y": 50,\n      "width": 100,\n      "height": 60,\n      "strokeColor": "#1e1e1e"\n    },\n    {\n      "type": "arrow",\n      "x": 150,\n      "y": 80,\n      "points": [[0, 0], [100, 0]]\n    }\n  ]\n}'
+    ],
+    outputSpecifications: [
+      'Output ONLY the Excalidraw JSON without markdown wrapper',
+      'Use valid JSON structure',
+      'Include required element properties',
+      'Use appropriate coordinate system',
+      'Define clear element relationships',
+      'Keep styling simple and consistent',
+      'Focus on conceptual clarity over precision'
+    ]
+  },
+
+  'vega-lite': {
+    format: 'vega-lite',
+    displayName: 'Vega-Lite',
+    syntaxGuidelines: [
+      'Use JSON structure with $schema, data, mark, encoding',
+      'Define schema: "$schema": "https://vega.github.io/schema/vega-lite/v5.json"',
+      'Define data: "data": {"values": [...]} or "data": {"url": "..."}',
+      'Define mark type: "mark": "point", "bar", "line", "area", etc.',
+      'Define encoding: "encoding": {"x": {...}, "y": {...}}',
+      'Use field and type for data mapping: {"field": "name", "type": "quantitative"}',
+      'Add titles and labels: "title": "Chart Title"',
+      'Use transforms for data manipulation when needed'
+    ],
+    bestPractices: [
+      'Choose appropriate mark types for data',
+      'Use meaningful field names and types',
+      'Add descriptive titles and axis labels',
+      'Apply consistent color schemes',
+      'Use transforms for data preparation',
+      'Include legends when helpful',
+      'Keep visualizations focused and clear'
+    ],
+    commonPitfalls: [
+      'DO NOT forget required schema declaration',
+      'DO NOT mix incompatible mark and encoding combinations',
+      'DO NOT use incorrect field type specifications',
+      'DO NOT create overly complex single visualizations',
+      'DO NOT ignore data structure requirements',
+      'DO NOT omit essential encoding properties',
+      'DO NOT use unclear or missing titles'
+    ],
+    examplePatterns: [
+      '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"x": 1, "y": 2}, {"x": 2, "y": 5}]},\n  "mark": "point",\n  "encoding": {\n    "x": {"field": "x", "type": "quantitative"},\n    "y": {"field": "y", "type": "quantitative"}\n  }\n}',
+      '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "title": "Sales by Month",\n  "data": {"values": [{"month": "Jan", "sales": 100}, {"month": "Feb", "sales": 150}]},\n  "mark": "bar",\n  "encoding": {\n    "x": {"field": "month", "type": "ordinal"},\n    "y": {"field": "sales", "type": "quantitative"}\n  }\n}',
+      '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"date": "2023-01", "value": 10}, {"date": "2023-02", "value": 15}]},\n  "mark": "line",\n  "encoding": {\n    "x": {"field": "date", "type": "temporal"},\n    "y": {"field": "value", "type": "quantitative"}\n  }\n}'
+    ],
+    outputSpecifications: [
+      'Output ONLY valid Vega-Lite JSON without markdown wrapper',
+      'Include required $schema declaration',
+      'Use proper data structure and format',
+      'Define appropriate mark type for visualization',
+      'Include complete encoding specifications',
+      'Use correct field types (quantitative, ordinal, temporal, nominal)',
+      'Add titles and labels for clarity',
+      'Ensure JSON is valid and well-formatted'
     ]
   }
 }; 

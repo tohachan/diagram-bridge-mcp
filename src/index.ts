@@ -120,7 +120,7 @@ server.registerTool(
             resource_uri: result.resource_uri,
             content_type: result.content_type,
             file_size: result.file_size,
-            message: `Diagram rendered successfully and saved to ${result.file_path}. File size: ${result.file_size} bytes. Access via resource URI: ${result.resource_uri}`
+            message: `Diagram rendered successfully and saved to ${result.file_path}. File size: ${result.file_size} bytes. Access via resource URI: ${result.resource_uri}\n\n⚠️ IMPORTANT: Do not attempt to read or analyze the contents of generated image files (especially SVG). These are binary/encoded image data meant for display, not text processing. Simply copy and use the file path or resource URI as needed.`
           }, null, 2)
         }]
       };

@@ -222,7 +222,7 @@ describe('Diagram Selection System', () => {
   describe('Metrics', () => {
     it('should provide system metrics', async () => {
       const metrics = await handler.getMetrics();
-      expect(metrics.supportedFormats).toBe(5); // mermaid, plantuml, d2, graphviz, erd
+      expect(metrics.supportedFormats).toBe(10); // All supported formats including new ones
       expect(metrics.heuristicsCount).toBeGreaterThanOrEqual(0);
       expect(typeof metrics.lastProcessingTime).toBe('number');
     });
@@ -231,7 +231,7 @@ describe('Diagram Selection System', () => {
   describe('Format Catalog', () => {
     it('should provide complete format catalog', () => {
       const catalog = handler.getFormatCatalog();
-      expect(catalog).toHaveLength(5);
+      expect(catalog).toHaveLength(10);
       
       const formatNames = catalog.map(f => f.format);
       expect(formatNames).toContain('mermaid');

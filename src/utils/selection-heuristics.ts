@@ -114,6 +114,106 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     format: 'erd',
     confidence: 0.7,
     reasoning: 'These domains often require database schema design best served by ERD'
+  },
+  
+  // BPMN heuristics
+  {
+    keywords: ['business process', 'workflow', 'bpmn', 'process model', 'swimlane', 'approval'],
+    format: 'bpmn',
+    confidence: 0.95,
+    reasoning: 'BPMN is the standard for business process modeling and workflow documentation'
+  },
+  {
+    keywords: ['process optimization', 'automation', 'compliance', 'procedure', 'workflow automation'],
+    format: 'bpmn',
+    confidence: 0.9,
+    reasoning: 'BPMN excels at documenting business processes for optimization and automation'
+  },
+  {
+    keywords: ['onboarding', 'approval process', 'fulfillment', 'error handling', 'cross-functional'],
+    format: 'bpmn',
+    confidence: 0.85,
+    reasoning: 'BPMN is ideal for complex business processes with multiple participants'
+  },
+  
+  // C4-PlantUML heuristics
+  {
+    keywords: ['software architecture', 'system context', 'container diagram', 'c4 model', 'architecture overview'],
+    format: 'c4-plantuml',
+    confidence: 0.9,
+    reasoning: 'C4 model is ideal for software architecture documentation at multiple levels'
+  },
+  {
+    keywords: ['microservices architecture', 'system integration', 'component structure', 'deployment architecture'],
+    format: 'c4-plantuml',
+    confidence: 0.85,
+    reasoning: 'C4-PlantUML provides excellent support for modern software architecture patterns'
+  },
+  {
+    keywords: ['technical documentation', 'architecture decision', 'context diagram', 'system landscape'],
+    format: 'c4-plantuml',
+    confidence: 0.8,
+    reasoning: 'C4 methodology is perfect for structured technical documentation'
+  },
+  
+  // Structurizr heuristics
+  {
+    keywords: ['architecture as code', 'structurizr', 'system landscape', 'deployment view'],
+    format: 'structurizr',
+    confidence: 0.85,
+    reasoning: 'Structurizr DSL provides comprehensive architecture documentation capabilities'
+  },
+  {
+    keywords: ['enterprise architecture', 'multi-level architecture', 'team collaboration', 'architecture views'],
+    format: 'structurizr',
+    confidence: 0.8,
+    reasoning: 'Structurizr excels at enterprise-level architecture documentation'
+  },
+  {
+    keywords: ['version control', 'text format', 'dsl', 'workspace', 'architecture methodology'],
+    format: 'structurizr',
+    confidence: 0.75,
+    reasoning: 'Structurizr DSL is ideal for architecture as code approaches'
+  },
+  
+  // Excalidraw heuristics
+  {
+    keywords: ['sketch', 'brainstorm', 'whiteboard', 'concept', 'hand-drawn', 'informal'],
+    format: 'excalidraw',
+    confidence: 0.8,
+    reasoning: 'Excalidraw excels at informal, sketch-style diagrams and brainstorming visuals'
+  },
+  {
+    keywords: ['wireframe', 'mockup', 'presentation', 'meeting', 'idea', 'rough'],
+    format: 'excalidraw',
+    confidence: 0.75,
+    reasoning: 'Excalidraw is perfect for low-fidelity sketches and conceptual drawings'
+  },
+  {
+    keywords: ['collaborative', 'quick', 'simple', 'approachable', 'concept sketch'],
+    format: 'excalidraw',
+    confidence: 0.7,
+    reasoning: 'Excalidraw provides an approachable way to create simple diagrams'
+  },
+  
+  // Vega-Lite heuristics
+  {
+    keywords: ['chart', 'graph', 'data visualization', 'metrics', 'analytics', 'dashboard', 'statistics'],
+    format: 'vega-lite',
+    confidence: 0.9,
+    reasoning: 'Vega-Lite is powerful for data visualization and interactive charts'
+  },
+  {
+    keywords: ['performance metrics', 'kpi', 'business intelligence', 'financial report', 'operational data'],
+    format: 'vega-lite',
+    confidence: 0.85,
+    reasoning: 'Vega-Lite excels at business and operational data visualization'
+  },
+  {
+    keywords: ['interactive', 'data exploration', 'statistical', 'scientific data', 'bar chart', 'line chart'],
+    format: 'vega-lite',
+    confidence: 0.8,
+    reasoning: 'Vega-Lite provides comprehensive support for interactive data visualization'
   }
 ];
 

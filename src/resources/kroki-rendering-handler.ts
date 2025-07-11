@@ -156,6 +156,9 @@ export class KrokiRenderingHandler {
     const issues: string[] = [];
 
     try {
+      // Get all supported formats
+      const supportedFormats = getSupportedDiagramFormats();
+      
       // Test validator
       const testInput: DiagramRenderingInput = {
         code: 'graph TD\nA-->B',
@@ -182,14 +185,30 @@ export class KrokiRenderingHandler {
         }
       }
 
-      // Test complete pipeline with small diagram
-      try {
-        const result = await this.processRequest(testInput);
-        if (!result.file_path || result.file_size < 100) {
-          issues.push('Complete pipeline test failed - invalid output');
+      // Test all supported formats with simple test cases
+      const formatTests = this.getFormatTestCases();
+      
+      for (const formatTest of formatTests) {
+        try {
+          const result = await this.processRequest(formatTest.input);
+          if (!result.file_path || result.file_size < 50) {
+            issues.push(`Format ${formatTest.format} test failed - invalid output`);
+          }
+        } catch (error) {
+          issues.push(`Format ${formatTest.format} test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-      } catch (error) {
-        issues.push(`Complete pipeline test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+
+      // Verify all formats are supported
+      const expectedFormats = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'];
+      for (const expectedFormat of expectedFormats) {
+        if (!supportedFormats.includes(expectedFormat)) {
+          issues.push(`Expected format ${expectedFormat} not supported`);
+        }
+      }
+
+      if (supportedFormats.length !== 10) {
+        issues.push(`Expected 10 supported formats, got ${supportedFormats.length}`);
       }
 
     } catch (error) {
@@ -198,8 +217,96 @@ export class KrokiRenderingHandler {
 
     return {
       status: issues.length === 0 ? 'healthy' : 'unhealthy',
-      details: issues
+      details: issues.length === 0 ? [`All ${getSupportedDiagramFormats().length} formats operational`] : issues
     };
+  }
+
+  /**
+   * Get test cases for all supported formats
+   */
+  private getFormatTestCases(): Array<{ format: string; input: DiagramRenderingInput }> {
+    return [
+      {
+        format: 'mermaid',
+        input: {
+          code: 'graph TD\nA-->B',
+          diagram_format: 'mermaid',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'plantuml',
+        input: {
+          code: '@startuml\nclass A\n@enduml',
+          diagram_format: 'plantuml',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'd2',
+        input: {
+          code: 'A -> B',
+          diagram_format: 'd2',
+          output_format: 'svg'
+        }
+      },
+      {
+        format: 'graphviz',
+        input: {
+          code: 'digraph G { A -> B; }',
+          diagram_format: 'graphviz',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'erd',
+        input: {
+          code: '[User]\n*id {label: "int"}',
+          diagram_format: 'erd',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'bpmn',
+        input: {
+          code: '<?xml version="1.0" encoding="UTF-8"?><bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"><bpmn:process><bpmn:startEvent/></bpmn:process></bpmn:definitions>',
+          diagram_format: 'bpmn',
+          output_format: 'svg'
+        }
+      },
+      {
+        format: 'c4-plantuml',
+        input: {
+          code: '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml\nPerson(user, "User")\n@enduml',
+          diagram_format: 'c4-plantuml',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'structurizr',
+        input: {
+          code: 'workspace { model { user = person "User" } views { systemLandscape { include * } } }',
+          diagram_format: 'structurizr',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'excalidraw',
+        input: {
+          code: '{"type": "excalidraw", "version": 2, "elements": [{"type": "rectangle", "x": 100, "y": 100, "width": 100, "height": 100}]}',
+          diagram_format: 'excalidraw',
+          output_format: 'png'
+        }
+      },
+      {
+        format: 'vega-lite',
+        input: {
+          code: '{"$schema": "https://vega.github.io/schema/vega-lite/v5.json", "data": {"values": [{"x": 1, "y": 1}]}, "mark": "point", "encoding": {"x": {"field": "x", "type": "quantitative"}, "y": {"field": "y", "type": "quantitative"}}}',
+          diagram_format: 'vega-lite',
+          output_format: 'png'
+        }
+      }
+    ];
   }
 
   /**

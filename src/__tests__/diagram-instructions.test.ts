@@ -239,7 +239,7 @@ describe('Diagram Instructions System', () => {
     });
 
     it('should handle all supported formats', async () => {
-      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'];
+      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'];
       
       for (const format of formats) {
         const input = {
@@ -281,15 +281,15 @@ describe('Diagram Instructions System', () => {
     it('should provide metrics', async () => {
       const metrics = await handler.getMetrics();
       
-      expect(metrics.supportedFormats).toBe(5);
+      expect(metrics.supportedFormats).toBe(10);
       expect(metrics.validationRules).toBe(4);
-      expect(Object.keys(metrics.templateSize)).toHaveLength(5);
+      expect(Object.keys(metrics.templateSize)).toHaveLength(10);
     });
 
     it('should get all supported formats', () => {
       const formats = handler.getAllSupportedFormats();
       
-      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd']);
+      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite']);
     });
 
     it('should get format template information', () => {

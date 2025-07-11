@@ -233,5 +233,160 @@ export const DIAGRAM_FORMAT_DEFINITIONS: Record<DiagramFormat, DiagramFormatChar
       'Blog platform data model',
       'Inventory management schema'
     ]
+  },
+
+  bpmn: {
+    name: 'bpmn',
+    displayName: 'BPMN',
+    description: 'Business Process Model and Notation for standardized business process diagrams',
+    strengths: [
+      'Industry standard for business processes',
+      'Comprehensive process modeling notation',
+      'Swimlane and cross-functional support',
+      'Event-driven process flows',
+      'Standardized symbols and semantics'
+    ],
+    weaknesses: [
+      'Complex notation for simple processes',
+      'Requires understanding of BPMN standards',
+      'Can be overwhelming for non-technical users'
+    ],
+    bestFor: [
+      'Business process documentation',
+      'Workflow automation planning',
+      'Process optimization analysis',
+      'Compliance and audit documentation',
+      'Cross-functional process mapping'
+    ],
+    examples: [
+      'Employee onboarding process',
+      'Order fulfillment workflow',
+      'Approval and review processes',
+      'Error handling procedures'
+    ]
+  },
+
+  'c4-plantuml': {
+    name: 'c4-plantuml',
+    displayName: 'C4-PlantUML',
+    description: 'C4 model implementation using PlantUML for software architecture documentation',
+    strengths: [
+      'Structured architecture documentation',
+      'Multiple abstraction levels (Context, Container, Component)',
+      'Consistent architectural notation',
+      'Software architecture best practices',
+      'Hierarchical system representation'
+    ],
+    weaknesses: [
+      'Specific to software architecture',
+      'Requires understanding of C4 methodology',
+      'PlantUML syntax complexity'
+    ],
+    bestFor: [
+      'Software architecture documentation',
+      'System context diagrams',
+      'Container and component architecture',
+      'Technical documentation standards',
+      'Architecture decision records'
+    ],
+    examples: [
+      'Microservices system overview',
+      'Application architecture layers',
+      'Integration architecture',
+      'Component interaction diagrams'
+    ]
+  },
+
+  structurizr: {
+    name: 'structurizr',
+    displayName: 'Structurizr',
+    description: 'Architecture as code platform with comprehensive modeling capabilities',
+    strengths: [
+      'Architecture as code approach',
+      'Multiple view support',
+      'Comprehensive modeling language',
+      'Version control integration',
+      'Enterprise architecture support'
+    ],
+    weaknesses: [
+      'Requires learning Structurizr DSL',
+      'Complex for simple diagrams',
+      'Enterprise-focused complexity'
+    ],
+    bestFor: [
+      'Enterprise architecture documentation',
+      'Architecture as code workflows',
+      'Multi-view system architecture',
+      'Large-scale system modeling',
+      'Team collaboration on architecture'
+    ],
+    examples: [
+      'Enterprise system landscapes',
+      'Multi-level architecture views',
+      'Deployment architecture',
+      'System integration maps'
+    ]
+  },
+
+  excalidraw: {
+    name: 'excalidraw',
+    displayName: 'Excalidraw',
+    description: 'Hand-drawn style diagramming tool for sketches and informal diagrams',
+    strengths: [
+      'Informal, approachable visual style',
+      'Quick sketching capabilities',
+      'Collaborative whiteboarding',
+      'Flexible and creative freedom',
+      'Great for brainstorming'
+    ],
+    weaknesses: [
+      'Less formal and structured',
+      'Limited standardization',
+      'Not suitable for official documentation'
+    ],
+    bestFor: [
+      'Brainstorming and ideation',
+      'Informal system sketches',
+      'Collaborative whiteboarding',
+      'Concept visualization',
+      'Presentation and meeting diagrams'
+    ],
+    examples: [
+      'Concept sketches',
+      'Brainstorming diagrams',
+      'Informal system overviews',
+      'Meeting collaboration boards'
+    ]
+  },
+
+  'vega-lite': {
+    name: 'vega-lite',
+    displayName: 'Vega-Lite',
+    description: 'Grammar of interactive graphics for data visualization and charts',
+    strengths: [
+      'Powerful data visualization capabilities',
+      'Interactive and dynamic charts',
+      'Declarative visualization grammar',
+      'Wide range of chart types',
+      'Data-driven visual encoding'
+    ],
+    weaknesses: [
+      'Requires understanding of data visualization principles',
+      'JSON-based configuration complexity',
+      'Limited to data visualization use cases'
+    ],
+    bestFor: [
+      'Data visualization and analytics',
+      'Interactive dashboards',
+      'Statistical chart creation',
+      'Business intelligence reporting',
+      'Scientific data presentation'
+    ],
+    examples: [
+      'Sales performance dashboards',
+      'Statistical analysis charts',
+      'Interactive data exploration',
+      'Business metrics visualization'
+    ]
   }
 }; 

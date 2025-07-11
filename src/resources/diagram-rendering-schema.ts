@@ -20,8 +20,8 @@ export const RENDER_DIAGRAM_SCHEMA = {
     diagram_format: {
       type: "string",
       description: "The format of the diagram source code",
-      enum: ["mermaid", "plantuml", "d2", "graphviz", "erd"],
-      examples: ["mermaid", "plantuml", "d2"]
+      enum: ["mermaid", "plantuml", "d2", "graphviz", "erd", "bpmn", "c4-plantuml", "structurizr", "excalidraw", "vega-lite"],
+      examples: ["mermaid", "plantuml", "d2", "bpmn", "c4-plantuml"]
     },
     output_format: {
       type: "string",
@@ -39,7 +39,7 @@ export const RENDER_DIAGRAM_OUTPUT_SCHEMA = {
   properties: {
     image_data: {
       type: "string",
-      description: "Base64 encoded image data",
+      description: "Base64 encoded image data. WARNING: This is binary data - do not attempt to read or analyze as text!",
       minLength: 100
     },
     content_type: {
@@ -59,7 +59,7 @@ export const RENDER_DIAGRAM_OUTPUT_SCHEMA = {
 export const RENDER_DIAGRAM_TOOL = {
   name: "render_diagram",
   title: "Render Diagram",
-  description: "Render diagram source code into an image using Kroki service",
+  description: "Render diagram source code into an image using Kroki service. ⚠️ IMPORTANT: Generated image files contain binary/encoded data and should NOT be read or analyzed as text - only use the provided file paths or resource URIs.",
   
   // Input validation schema
   inputSchema: RENDER_DIAGRAM_SCHEMA,
@@ -97,7 +97,7 @@ export const DIAGRAM_RENDERING_RESOURCE_CONFIG = {
         },
         diagram_format: {
           type: 'string',
-          enum: ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'],
+          enum: ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'],
           description: 'Must be a supported diagram format'
         },
         output_format: {
@@ -114,13 +114,14 @@ export const DIAGRAM_RENDERING_RESOURCE_CONFIG = {
       content: {
         image_data: {
           type: 'string',
-          description: 'Base64 encoded image data ready for display'
+          description: 'Base64 encoded image data ready for display. WARNING: Do not attempt to read or analyze this data as text!'
         },
         content_type: {
           type: 'string',
           description: 'MIME type for proper image handling'
         }
-      }
+      },
+      warning: 'Generated image files contain binary/encoded data and should NOT be read or analyzed as text. Only use provided file paths or resource URIs for file operations.'
     }
   },
   

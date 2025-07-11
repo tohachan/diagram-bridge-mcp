@@ -20,8 +20,8 @@ export const GET_DIAGRAM_INSTRUCTIONS_SCHEMA = {
     diagram_format: {
       type: "string",
       description: "Target diagram language/format",
-      enum: ["mermaid", "plantuml", "d2", "graphviz", "erd"],
-      examples: ["mermaid", "plantuml", "d2"]
+      enum: ["mermaid", "plantuml", "d2", "graphviz", "erd", "bpmn", "c4-plantuml", "structurizr", "excalidraw", "vega-lite"],
+      examples: ["mermaid", "plantuml", "d2", "bpmn", "c4-plantuml"]
     }
   },
   required: ["user_request", "diagram_format"],

@@ -238,7 +238,27 @@ export class KrokiHttpClient implements KrokiClient {
       };
     }
     
-    if (message.includes('http 4') || message.includes('syntax') || message.includes('invalid')) {
+    // Distinguish between syntax errors and size/complexity errors
+    if (message.includes('http 400')) {
+      // Check for size/complexity indicators
+      if (message.includes('bad request') && !message.includes('syntax') && !message.includes('parse')) {
+        return {
+          type: 'SIZE_LIMIT_ERROR' as DiagramRenderingError,
+          message: `Diagram too complex or large for API: ${error.message}`,
+          retryable: false
+        };
+      }
+      
+      // Otherwise assume syntax error
+      return {
+        type: 'SYNTAX_ERROR' as DiagramRenderingError,
+        message: `Invalid diagram syntax: ${error.message}`,
+        retryable: false
+      };
+    }
+    
+    // Other HTTP 4xx errors or explicit syntax errors
+    if (message.includes('http 4') || message.includes('syntax') || message.includes('invalid') || message.includes('malformed')) {
       return {
         type: 'SYNTAX_ERROR' as DiagramRenderingError,
         message: `Invalid diagram syntax: ${error.message}`,

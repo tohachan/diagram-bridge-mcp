@@ -282,9 +282,12 @@ By default, rendered diagram files are saved to `{current-working-directory}/gen
   "file_path": "/Users/you/projects/diagram-bridge-mcp/generated-diagrams/diagram-mermaid-1234567890.png",
   "resource_uri": "diagram://saved/diagram-mermaid-1234567890.png",
   "content_type": "image/png",
-  "file_size": 45678
+  "file_size": 45678,
+  "message": "Diagram rendered successfully... ⚠️ IMPORTANT: Do not attempt to read or analyze the contents of generated image files (especially SVG). These are binary/encoded image data meant for display, not text processing. Simply copy and use the file path or resource URI as needed."
 }
 ```
+
+> **⚠️ Important Usage Note**: Generated image files (PNG/SVG) contain binary or encoded image data and should **NOT** be read or analyzed as text. LLMs should only use the provided `file_path` or `resource_uri` for file operations, not attempt to process the image contents.
 
 **Custom storage path:**
 ```bash

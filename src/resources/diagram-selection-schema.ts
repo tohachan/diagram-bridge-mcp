@@ -22,7 +22,7 @@ export const HELP_CHOOSE_DIAGRAM_SCHEMA = {
       description: "Optional array of available diagram formats to choose from",
       items: {
         type: "string",
-        enum: ["mermaid", "plantuml", "d2", "graphviz", "erd"]
+        enum: ["mermaid", "plantuml", "d2", "graphviz", "erd", "bpmn", "c4-plantuml", "structurizr", "excalidraw", "vega-lite"]
       },
       uniqueItems: true,
       examples: [

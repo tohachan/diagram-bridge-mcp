@@ -17,15 +17,23 @@ export class DiagramFormatsFactory {
   static createDefaultRegistry(): DiagramFormatsRegistry {
     return {
       formats: {
+        // Original formats
         mermaid: this.createMermaidConfig(),
         plantuml: this.createPlantUMLConfig(),
         d2: this.createD2Config(),
         graphviz: this.createGraphvizConfig(),
-        erd: this.createERDConfig()
+        erd: this.createERDConfig(),
+        
+        // New formats
+        bpmn: this.createBPMNConfig(),
+        'c4-plantuml': this.createC4PlantUMLConfig(),
+        structurizr: this.createStructurizrConfig(),
+        excalidraw: this.createExcalidrawConfig(),
+        'vega-lite': this.createVegaLiteConfig()
       },
       defaultFormat: 'mermaid',
       lastUpdated: new Date().toISOString(),
-      version: '1.0.0'
+      version: '2.0.0'
     };
   }
 
@@ -420,10 +428,419 @@ export class DiagramFormatsFactory {
   }
 
   /**
+   * Create BPMN format configuration
+   */
+  private static createBPMNConfig(): DiagramFormatConfig {
+    return {
+      id: 'bpmn',
+      displayName: 'BPMN',
+      description: 'Business Process Model and Notation for modeling business processes',
+      krokiFormat: 'bpmn',
+      supportedOutputs: ['svg'],
+      enabled: true,
+      characteristics: {
+        strengths: [
+          'Standard notation for business processes',
+          'Widely recognized in business analysis',
+          'Rich set of symbols and constructs',
+          'Supports complex process flows',
+          'Integration with business tools'
+        ],
+        weaknesses: [
+          'Complex syntax for beginners',
+          'Requires understanding of BPMN notation',
+          'Limited to process modeling',
+          'Only supports SVG output format (no PNG)'
+        ],
+        bestFor: [
+          'Business process documentation',
+          'Workflow automation design',
+          'Process analysis and optimization',
+          'Compliance documentation',
+          'Cross-functional process mapping'
+        ],
+        examples: [
+          'Customer onboarding process',
+          'Order fulfillment workflow',
+          'Approval processes',
+          'Error handling procedures'
+        ]
+      },
+      instructionTemplate: {
+        syntaxGuidelines: [
+          'Use proper BPMN 2.0 XML format with ALL required namespaces',
+          'Start with XML declaration: <?xml version="1.0" encoding="UTF-8"?>',
+          'Include ALL namespaces: bpmn, bpmndi, dc, di with proper URLs',
+          'Add targetNamespace="http://bpmn.io/schema/bpmn" and id="Definitions_1"',
+          'Create bpmn:process element with isExecutable="false"',
+          'Use standard BPMN elements: startEvent, task, exclusiveGateway, endEvent',
+          'Connect elements with sequenceFlow using sourceRef/targetRef attributes',
+          'MANDATORY: Include bpmndi:BPMNDiagram section with visual information',
+          'Add bpmndi:BPMNShape for each element with dc:Bounds coordinates',
+          'Add bpmndi:BPMNEdge for each flow with di:waypoint coordinates',
+          'DO NOT use XML comments <!-- --> - they cause parsing errors'
+        ],
+        bestPractices: [
+          'Start with simple single-process diagrams',
+          'Use clear, descriptive names for tasks and events',
+          'Keep process flows linear and easy to follow',
+          'Use exclusiveGateway for simple decision points',
+          'Ensure all elements have unique IDs',
+          'Test with simple examples before adding complexity',
+          'Focus on single participant processes',
+          'Use proper BPMN 2.0 element structure',
+          'Use one gateway per decision point - avoid reusing gateways',
+          'Create clear linear paths without complex cycles',
+          'Validate that every element has proper incoming/outgoing flows',
+          'Design for readability - complex processes can be split into multiple diagrams if needed'
+        ],
+              commonPitfalls: [
+        'DO NOT request PNG format - BPMN only supports SVG output',
+        'DO NOT use collaboration and messageFlow - causes validation errors',
+        'DO NOT create multiple processes in single diagram',
+        'DO NOT use complex gateway combinations',
+        'DO NOT forget to connect elements with sequenceFlow',
+        'DO NOT use special characters in element IDs',
+        'DO NOT create processes without start/end events',
+        'DO NOT use unsupported BPMN elements',
+        'DO NOT overcomplicate simple workflows',
+        'DO NOT use XML comments <!-- --> - they break parsing',
+        'DO NOT create complex loops or cycles - they cause validation errors',
+        'DO NOT use same gateway for conflicting decision paths',
+        'DO NOT create elements without proper flow connections'
+      ],
+        examplePatterns: [
+          '<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n  <bpmn:process id="Process_1" isExecutable="false">\n    <bpmn:startEvent id="StartEvent_1" name="Start"/>\n    <bpmn:task id="Task_1" name="Process Request"/>\n    <bpmn:endEvent id="EndEvent_1" name="End"/>\n    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>\n    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1"/>\n  </bpmn:process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_1">\n    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">\n        <dc:Bounds x="152" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">\n        <dc:Bounds x="240" y="60" width="100" height="80"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">\n        <dc:Bounds x="392" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">\n        <di:waypoint x="188" y="100"/>\n        <di:waypoint x="240" y="100"/>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">\n        <di:waypoint x="340" y="100"/>\n        <di:waypoint x="392" y="100"/>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn:definitions>'
+        ],
+              outputSpecifications: [
+        'CRITICAL: BPMN only supports SVG output format - do not request PNG',
+        'Output ONLY valid BPMN 2.0 XML without markdown wrapper',
+        'Always include XML declaration with UTF-8 encoding',
+        'Include ALL four namespaces: bpmn, bpmndi, dc, di',
+        'Add targetNamespace and id attributes to definitions',
+        'Create single bpmn:process with isExecutable="false"',
+        'MANDATORY: Include complete bpmndi:BPMNDiagram section',
+        'Add bpmndi:BPMNShape for every element with dc:Bounds',
+        'Add bpmndi:BPMNEdge for every flow with di:waypoint',
+        'Use proper coordinate positioning for visual layout',
+        'Design comprehensive business processes as needed - complexity is supported'
+      ]
+      },
+      fileExtensions: ['.bpmn', '.bpmn2'],
+      exampleCode: '<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n  <bpmn:process id="Process_1" isExecutable="false">\n    <bpmn:startEvent id="start" name="Start"/>\n    <bpmn:task id="task" name="Process Request"/>\n    <bpmn:endEvent id="end" name="End"/>\n    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="task"/>\n    <bpmn:sequenceFlow id="flow2" sourceRef="task" targetRef="end"/>\n  </bpmn:process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_1">\n    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n      <bpmndi:BPMNShape id="start_di" bpmnElement="start">\n        <dc:Bounds x="152" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="task_di" bpmnElement="task">\n        <dc:Bounds x="240" y="60" width="100" height="80"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="end_di" bpmnElement="end">\n        <dc:Bounds x="392" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id="flow1_di" bpmnElement="flow1">\n        <di:waypoint x="188" y="100"/>\n        <di:waypoint x="240" y="100"/>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id="flow2_di" bpmnElement="flow2">\n        <di:waypoint x="340" y="100"/>\n        <di:waypoint x="392" y="100"/>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn:definitions>'
+    };
+  }
+
+  /**
+   * Create C4-PlantUML format configuration
+   */
+  private static createC4PlantUMLConfig(): DiagramFormatConfig {
+    return {
+      id: 'c4-plantuml',
+      displayName: 'C4 with PlantUML',
+      description: 'C4 model diagrams using PlantUML with C4 standard library',
+      krokiFormat: 'c4plantuml',
+      supportedOutputs: ['png', 'svg'],
+      enabled: true,
+      characteristics: {
+        strengths: [
+          'Standardized software architecture modeling',
+          'Multiple abstraction levels (Context, Container, Component, Code)',
+          'Clear separation of concerns',
+          'Well-defined notation and semantics',
+          'Integration with PlantUML ecosystem'
+        ],
+        weaknesses: [
+          'Requires understanding of C4 methodology',
+          'PlantUML syntax complexity',
+          'Limited to software architecture'
+        ],
+        bestFor: [
+          'Software system architecture documentation',
+          'System context diagrams',
+          'Container and component diagrams',
+          'Technical documentation',
+          'Architecture decision records'
+        ],
+        examples: [
+          'Microservices architecture overview',
+          'System integration context',
+          'Application component structure',
+          'Deployment architecture'
+        ]
+      },
+      instructionTemplate: {
+        syntaxGuidelines: [
+          'Include C4 standard library: !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml',
+          'Use C4 macros: Person(), System(), Container(), Component()',
+          'Define relationships with Rel() and BiRel() macros',
+          'Structure with @startuml/@enduml blocks',
+          'Use appropriate C4 diagram types'
+        ],
+        bestPractices: [
+          'Start with context diagram, then drill down',
+          'Use consistent naming conventions',
+          'Include descriptions in elements',
+          'Group related elements with boundaries',
+          'Use standard C4 colors and styling'
+        ],
+        commonPitfalls: [
+          'DO NOT forget to include C4 library',
+          'DO NOT mix C4 abstraction levels',
+          'DO NOT use PlantUML syntax without C4 macros',
+          'DO NOT create overly complex single diagrams',
+          'DO NOT ignore C4 methodology principles'
+        ],
+        examplePatterns: [
+          '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml\n\nPerson(user, "User")\nSystem(system, "System", "Description")\n\nRel(user, system, "Uses")\n@enduml'
+        ],
+        outputSpecifications: [
+          'Output ONLY the C4-PlantUML code',
+          'Always include C4 library reference',
+          'Use proper C4 macros and syntax',
+          'Include @startuml/@enduml wrapper'
+        ]
+      },
+      fileExtensions: ['.c4', '.puml'],
+      exampleCode: '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml\n\nPerson(user, "User")\nSystem(webapp, "Web Application")\nRel(user, webapp, "Uses")\n@enduml'
+    };
+  }
+
+  /**
+   * Create Structurizr format configuration
+   */
+  private static createStructurizrConfig(): DiagramFormatConfig {
+    return {
+      id: 'structurizr',
+      displayName: 'Structurizr',
+      description: 'Structurizr DSL for software architecture diagrams',
+      krokiFormat: 'structurizr',
+      supportedOutputs: ['png', 'svg'],
+      enabled: true,
+      characteristics: {
+        strengths: [
+          'Domain-specific language for architecture',
+          'Multiple view types automatically generated',
+          'Consistent with C4 model methodology',
+          'Version control friendly text format',
+          'Rich styling and theming options'
+        ],
+        weaknesses: [
+          'Learning curve for DSL syntax',
+          'Limited to software architecture domain',
+          'Requires Structurizr-specific knowledge'
+        ],
+        bestFor: [
+          'Software architecture as code',
+          'System landscape documentation',
+          'Multi-level architecture views',
+          'Architecture decision documentation',
+          'Team collaboration on architecture'
+        ],
+        examples: [
+          'Enterprise system landscape',
+          'Microservices ecosystem',
+          'Integration architecture',
+          'Deployment views'
+        ]
+      },
+      instructionTemplate: {
+        syntaxGuidelines: [
+          'Define workspace with model and views',
+          'Create people, software systems, containers, components',
+          'Use -> for relationships',
+          'Define views for different perspectives',
+          'Include descriptions and metadata'
+        ],
+        bestPractices: [
+          'Start with model definition, then views',
+          'Use meaningful names and descriptions',
+          'Group related elements logically',
+          'Define consistent styling themes',
+          'Include multiple view types'
+        ],
+        commonPitfalls: [
+          'DO NOT forget to define views',
+          'DO NOT use invalid DSL syntax',
+          'DO NOT create models without descriptions',
+          'DO NOT ignore relationship directions',
+          'DO NOT mix abstraction levels improperly'
+        ],
+        examplePatterns: [
+          'workspace {\n  model {\n    user = person "User"\n    system = softwareSystem "System"\n    user -> system "Uses"\n  }\n  views {\n    systemContext system {\n      include *\n    }\n  }\n}'
+        ],
+        outputSpecifications: [
+          'Output ONLY the Structurizr DSL code',
+          'Define complete workspace with model and views',
+          'Use proper DSL syntax and structure',
+          'Include meaningful descriptions'
+        ]
+      },
+      fileExtensions: ['.dsl', '.structurizr'],
+      exampleCode: 'workspace {\n  model {\n    user = person "User"\n    webapp = softwareSystem "Web App"\n    user -> webapp "Uses"\n  }\n  views {\n    systemContext webapp {\n      include *\n    }\n  }\n}'
+    };
+  }
+
+  /**
+   * Create Excalidraw format configuration
+   */
+  private static createExcalidrawConfig(): DiagramFormatConfig {
+    return {
+      id: 'excalidraw',
+      displayName: 'Excalidraw',
+      description: 'Hand-drawn style diagrams and sketches',
+      krokiFormat: 'excalidraw',
+      supportedOutputs: ['png', 'svg'],
+      enabled: true,
+      characteristics: {
+        strengths: [
+          'Hand-drawn aesthetic',
+          'Intuitive and approachable style',
+          'Great for brainstorming and sketches',
+          'Low barrier to entry',
+          'Collaborative friendly'
+        ],
+        weaknesses: [
+          'Limited precision and structure',
+          'JSON format complexity',
+          'Not suitable for formal documentation',
+          'Less standardized notation'
+        ],
+        bestFor: [
+          'Brainstorming sessions',
+          'Concept sketches',
+          'Informal documentation',
+          'Presentation diagrams',
+          'Wireframes and mockups'
+        ],
+        examples: [
+          'System concept sketches',
+          'Meeting whiteboard captures',
+          'Quick architecture ideas',
+          'User flow sketches'
+        ]
+      },
+      instructionTemplate: {
+        syntaxGuidelines: [
+          'Use Excalidraw JSON format',
+          'Define elements array with shapes',
+          'Include appState and files properties',
+          'Use standard element types: rectangle, ellipse, arrow, text',
+          'Set coordinates and dimensions for positioning'
+        ],
+        bestPractices: [
+          'Keep drawings simple and clear',
+          'Use consistent colors and styles',
+          'Group related elements',
+          'Add descriptive text labels',
+          'Maintain readable proportions'
+        ],
+        commonPitfalls: [
+          'DO NOT use invalid JSON format',
+          'DO NOT forget required properties',
+          'DO NOT create overly complex drawings',
+          'DO NOT ignore element positioning',
+          'DO NOT use unsupported element types'
+        ],
+        examplePatterns: [
+          '{\n  "type": "excalidraw",\n  "version": 2,\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "label": "System"\n    }\n  ]\n}'
+        ],
+        outputSpecifications: [
+          'Output ONLY valid Excalidraw JSON',
+          'Include type and version properties',
+          'Define elements array with shapes',
+          'Use proper coordinate positioning'
+        ]
+      },
+      fileExtensions: ['.excalidraw', '.json'],
+      exampleCode: '{\n  "type": "excalidraw",\n  "version": 2,\n  "elements": [\n    {\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "label": "System"\n    }\n  ]\n}'
+    };
+  }
+
+  /**
+   * Create Vega-Lite format configuration
+   */
+  private static createVegaLiteConfig(): DiagramFormatConfig {
+    return {
+      id: 'vega-lite',
+      displayName: 'Vega-Lite',
+      description: 'Grammar of interactive graphics for data visualization',
+      krokiFormat: 'vegalite',
+      supportedOutputs: ['png', 'svg'],
+      enabled: true,
+      characteristics: {
+        strengths: [
+          'Powerful data visualization grammar',
+          'Interactive and dynamic charts',
+          'Wide variety of chart types',
+          'Statistical transformations',
+          'JSON-based specification'
+        ],
+        weaknesses: [
+          'Requires understanding of visualization grammar',
+          'Complex syntax for advanced features',
+          'JSON verbosity',
+          'Limited to data visualization'
+        ],
+        bestFor: [
+          'Data analysis dashboards',
+          'Statistical reports',
+          'Interactive data exploration',
+          'Business intelligence visualizations',
+          'Scientific data presentation'
+        ],
+        examples: [
+          'Performance metrics charts',
+          'User analytics dashboards',
+          'Financial reports',
+          'Operational KPI displays'
+        ]
+      },
+      instructionTemplate: {
+        syntaxGuidelines: [
+          'Use valid Vega-Lite JSON schema',
+          'Define data, mark, and encoding properties',
+          'Specify chart type with mark property',
+          'Map data fields to visual channels in encoding',
+          'Include title and axis labels'
+        ],
+        bestPractices: [
+          'Start with simple chart types',
+          'Use appropriate mark types for data',
+          'Include clear titles and labels',
+          'Choose appropriate color schemes',
+          'Add interactivity when beneficial'
+        ],
+        commonPitfalls: [
+          'DO NOT use invalid JSON schema',
+          'DO NOT forget required properties',
+          'DO NOT mix incompatible mark types',
+          'DO NOT ignore data field types',
+          'DO NOT create overly complex visualizations'
+        ],
+        examplePatterns: [
+          '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"x": 1, "y": 2}]},\n  "mark": "point",\n  "encoding": {\n    "x": {"field": "x", "type": "quantitative"},\n    "y": {"field": "y", "type": "quantitative"}\n  }\n}'
+        ],
+        outputSpecifications: [
+          'Output ONLY valid Vega-Lite JSON',
+          'Include schema reference',
+          'Define data, mark, and encoding',
+          'Use proper field type mappings'
+        ]
+      },
+      fileExtensions: ['.vl.json', '.vega'],
+      exampleCode: '{\n  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",\n  "data": {"values": [{"month": "Jan", "sales": 100}, {"month": "Feb", "sales": 150}]},\n  "mark": "bar",\n  "encoding": {\n    "x": {"field": "month", "type": "ordinal"},\n    "y": {"field": "sales", "type": "quantitative"}\n  }\n}'
+    };
+  }
+
+  /**
    * Get all supported format IDs
    */
   static getSupportedFormatIds(): string[] {
-    return ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'];
+    return [
+      'mermaid', 'plantuml', 'd2', 'graphviz', 'erd',
+      'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'
+    ];
   }
 
   /**

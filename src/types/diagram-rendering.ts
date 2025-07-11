@@ -184,6 +184,7 @@ export type DiagramRenderingError =
   | 'INVALID_INPUT'
   | 'UNSUPPORTED_FORMAT'
   | 'SYNTAX_ERROR'
+  | 'SIZE_LIMIT_ERROR'
   | 'KROKI_UNAVAILABLE'
   | 'NETWORK_ERROR'
   | 'TIMEOUT_ERROR'

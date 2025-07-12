@@ -9,24 +9,39 @@ import { DiagramFormat } from '../types/diagram-selection.js';
 import { OutputFormat } from '../types/diagram-rendering.js';
 import { getKrokiFormat, getContentType } from '../resources/diagram-rendering-format-mapping.js';
 import { getDiagramFilePath } from '../utils/file-path.js';
+import { getKrokiConfig, validateKrokiConfig, getConfigSummary, KrokiConfig } from '../config/kroki.js';
 
 /**
  * HTTP client for Kroki diagram rendering service
+ * Prioritizes local Docker setup with strict no-fallback policy
  */
 export class KrokiHttpClient implements KrokiClient {
   private config: KrokiRequestConfig;
+  private krokiConfig: KrokiConfig;
 
   constructor(config?: Partial<KrokiRequestConfig>) {
+    // Get validated Kroki configuration
+    this.krokiConfig = getKrokiConfig();
+    const validation = validateKrokiConfig(this.krokiConfig);
+    
+    if (!validation.isValid) {
+      throw new Error(`Invalid Kroki configuration: ${validation.errors.join(', ')}`);
+    }
+
     this.config = {
-      baseUrl: config?.baseUrl || process.env.KROKI_URL || 'https://kroki.io',
-      timeout: config?.timeout || 30000, // 30 seconds
-      maxRetries: config?.maxRetries || 3,
+      baseUrl: this.krokiConfig.baseUrl,
+      timeout: this.krokiConfig.timeout,
+      maxRetries: this.krokiConfig.maxRetries,
       retryDelay: config?.retryDelay || 1000 // 1 second
     };
+
+    // Log configuration for debugging
+    console.info(`[KrokiClient] ${getConfigSummary(this.krokiConfig)}`);
   }
 
   /**
    * Render diagram via Kroki API and save to file
+   * NO CLOUD FALLBACK - fails if local service is unavailable
    */
   async renderDiagram(
     code: string, 
@@ -37,32 +52,46 @@ export class KrokiHttpClient implements KrokiClient {
     const krokiFormat = getKrokiFormat(format);
     const url = this.buildUrl(krokiFormat, outputFormat);
     
+    // Validate we're using the expected service
+    if (this.krokiConfig.useLocal && !this.isLocalUrl(url)) {
+      throw new Error(`Configuration error: Expected local Kroki URL but got ${url}. Check KROKI_URL environment variable.`);
+    }
+    
     let lastError: Error = new Error('No attempts made');
     
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
       try {
         // Add delay between retries (but not on first attempt)
         if (attempt > 0) {
+          console.warn(`[KrokiClient] Retry attempt ${attempt}/${this.config.maxRetries} for ${format} diagram`);
           await this.delay(this.config.retryDelay * Math.pow(2, attempt - 1)); // Exponential backoff
         }
         
         const response = await this.makeRequest(url, code, format);
-        return await this.processResponse(response, outputFormat, outputPath);
+        const result = await this.processResponse(response, outputFormat, outputPath);
+        
+        if (attempt > 0) {
+          console.info(`[KrokiClient] Successfully rendered ${format} diagram after ${attempt} retries`);
+        }
+        
+        return result;
         
       } catch (error) {
         lastError = error as Error;
         
         // Don't retry on certain types of errors
         if (this.isNonRetryableError(error)) {
+          console.error(`[KrokiClient] Non-retryable error for ${format} diagram:`, error instanceof Error ? error.message : error);
           break;
         }
         
         // Log retry attempt
-        console.error(`Kroki request attempt ${attempt + 1} failed:`, error instanceof Error ? error.message : error);
+        console.error(`[KrokiClient] Request attempt ${attempt + 1} failed for ${format} diagram:`, error instanceof Error ? error.message : error);
       }
     }
     
-    // All retries exhausted, throw the last error
+    // All retries exhausted - NO FALLBACK TO CLOUD
+    console.error(`[KrokiClient] All ${this.config.maxRetries + 1} attempts failed for ${format} diagram. Cloud fallback is disabled.`);
     throw this.createRenderingError(lastError);
   }
 
@@ -389,4 +418,14 @@ export class KrokiHttpClient implements KrokiClient {
       };
     }
   }
-} 
+
+  /**
+   * Check if URL points to local Kroki service
+   */
+  private isLocalUrl(url: string): boolean {
+    return url.includes('kroki:8000') || 
+           url.includes('localhost:8000') || 
+           url.includes('127.0.0.1:8000') ||
+           url.includes('0.0.0.0:8000');
+  }
+}

@@ -42,11 +42,20 @@ Perfect for LLMs that need to create diagrams but don't know which format to use
 
 | Format | Best For | Strengths |
 |--------|----------|-----------|
-| **Mermaid** | Flowcharts, sequences, user journeys | Easy syntax, GitHub support, live editing |
+| **Mermaid** | Process flows, sequence diagrams, user journeys | Easy syntax, GitHub support, live editing |
 | **PlantUML** | UML diagrams, software architecture | Complete UML support, professional output |
-| **D2** | System architecture, infrastructure | Modern syntax, automatic layouts |
-| **GraphViz** | Complex graphs, dependencies | Precise layouts, mathematical precision |
+| **C4 Model** | Software architecture, system context | Standardized architecture modeling, multiple abstraction levels |
+| **D2** | System architecture, infrastructure layouts | Modern syntax, automatic layouts |
+| **GraphViz** | Complex graphs, network topologies | Precise layouts, mathematical precision |
 | **ERD** | Database schemas, entity relationships | Database-specific features, cardinality specs |
+| **BPMN** | Business processes, workflow automation | Standard business notation, widely recognized |
+| **Structurizr** | C4 model diagrams, architecture documentation | C4 methodology support, multi-level modeling |
+| **Excalidraw** | Brainstorming, concept sketches | Hand-drawn aesthetic, intuitive style |
+| **Vega-Lite** | Data visualization, statistical reports | Powerful visualization grammar, interactive charts |
+
+**Total: 12 supported formats** with multiple aliases for compatibility:
+- **C4 variants**: `c4`, `c4-plantuml`, `c4plantuml` (all point to C4-PlantUML implementation)
+- **Vega-Lite**: `vega-lite` format for data visualization
 
 ## 🏗️ Architecture
 
@@ -88,16 +97,30 @@ npm start
 
 ## 🐳 Docker Deployment
 
-### Quick Start with Docker Compose
+### Quick Start with Docker Compose (Recommended)
 
-The easiest way to run the complete stack with diagram rendering capabilities:
+**Local-First Architecture**: By default, uses local Docker Kroki with no cloud fallback.
 
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd diagram-bridge-mcp
 
-# Start the complete stack (MCP server + Kroki services)
+# Start the complete local stack (MCP server + Kroki services)
+docker-compose up --build
+
+# Access points:
+# - MCP Server: localhost:3000
+# - Kroki Dashboard: localhost:8000
+```
+
+### Alternative: Cloud Mode (Explicit Override)
+```bash
+# Use external Kroki service (only if local setup isn't suitable)
+docker-compose -f docker-compose.cloud.yml up --build
+```
+
+For detailed Kroki configuration options, see [KROKI_SETUP.md](KROKI_SETUP.md).
 docker-compose up -d
 
 # Check the status
@@ -351,15 +374,15 @@ This ensures LLMs can easily copy and manipulate the generated files using their
 ```json
 {
   "user_request": "Create a database schema for an e-commerce system",
-  "available_formats": ["erd", "plantuml"]
+  "available_formats": ["erd", "plantuml", "c4"]
 }
 ```
 
 #### 3. Get Format-Specific Instructions (get_diagram_instructions)
 ```json
 {
-  "user_request": "Create a user authentication sequence diagram",
-  "diagram_format": "mermaid"
+  "user_request": "Create a microservices architecture diagram", 
+  "diagram_format": "c4"
 }
 ```
 
@@ -460,7 +483,7 @@ The test suite includes:
 
 **Docker Integration Tests:**
 - Real diagram rendering through Kroki services
-- All 10 diagram formats validation
+- All 12+ diagram formats validation
 - PNG/SVG output format testing
 - Performance and reliability testing
 - 15 test cases covering end-to-end workflows
@@ -498,7 +521,7 @@ npm test -- --testNamePattern="Format Validation"
 ```
 
 **What the Docker tests cover:**
-- ✅ All 10 diagram formats with actual Kroki rendering
+- ✅ All 12+ diagram formats with actual Kroki rendering
 - ✅ PNG and SVG output validation (where supported)
 - ✅ Health checks for Kroki service connectivity
 - ✅ Format-specific rendering with example diagrams
@@ -610,7 +633,7 @@ Extend the format definitions in `src/resources/diagram-selection-config.ts` to:
 ```typescript
 {
   user_request: string;        // Required: Original diagram request
-  diagram_format: string;      // Required: Target format (mermaid|plantuml|d2|graphviz|erd)
+  diagram_format: string;      // Required: Target format (mermaid|plantuml|c4|d2|graphviz|erd|bpmn|structurizr|excalidraw|vega-lite)
 }
 ```
 
@@ -627,7 +650,7 @@ Extend the format definitions in `src/resources/diagram-selection-config.ts` to:
 ```typescript
 {
   code: string;               // Required: Diagram source code (1-100,000 chars)
-  diagram_format: string;     // Required: Format (mermaid|plantuml|d2|graphviz|erd)
+  diagram_format: string;     // Required: Format (mermaid|plantuml|c4|d2|graphviz|erd|bpmn|structurizr|excalidraw|vega-lite)
   output_format?: string;     // Optional: Output format (png|svg, default: png)
 }
 ```

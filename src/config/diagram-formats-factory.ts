@@ -27,6 +27,8 @@ export class DiagramFormatsFactory {
         // New formats
         bpmn: this.createBPMNConfig(),
         'c4-plantuml': this.createC4PlantUMLConfig(),
+        'c4plantuml': this.createC4PlantUMLAliasConfig(), // Alias for c4-plantuml (matches Kroki format)
+        'c4': this.createC4ShortAliasConfig(), // Short alias for C4 model diagrams
         structurizr: this.createStructurizrConfig(),
         excalidraw: this.createExcalidrawConfig(),
         'vega-lite': this.createVegaLiteConfig()
@@ -598,6 +600,34 @@ export class DiagramFormatsFactory {
   }
 
   /**
+   * Create C4 PlantUML alias configuration (for c4plantuml format)
+   * This is an alias that uses the same config as c4-plantuml but with different ID
+   */
+  private static createC4PlantUMLAliasConfig(): DiagramFormatConfig {
+    const baseConfig = this.createC4PlantUMLConfig();
+    return {
+      ...baseConfig,
+      id: 'c4plantuml',  // Different ID but same functionality
+      displayName: 'C4 PlantUML (Kroki format)',
+      description: 'C4 model diagrams using PlantUML with C4 standard library (Kroki format alias)'
+    };
+  }
+
+  /**
+   * Create C4 short alias configuration (for c4 format)
+   * This is a short alias that uses the same config as c4-plantuml
+   */
+  private static createC4ShortAliasConfig(): DiagramFormatConfig {
+    const baseConfig = this.createC4PlantUMLConfig();
+    return {
+      ...baseConfig,
+      id: 'c4',  // Short alias for easier access
+      displayName: 'C4 Model',
+      description: 'C4 model diagrams - software architecture modeling with standardized notation (short alias for c4-plantuml)'
+    };
+  }
+
+  /**
    * Create Structurizr format configuration
    */
   private static createStructurizrConfig(): DiagramFormatConfig {
@@ -892,4 +922,4 @@ export class DiagramFormatsFactory {
       exampleCode: config.exampleCode || ''
     };
   }
-} 
+}

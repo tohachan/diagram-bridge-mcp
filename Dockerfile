@@ -47,7 +47,11 @@ USER mcp
 # Environment variables with defaults
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV KROKI_URL=https://kroki.io
+ENV DOCKER_CONTAINER=true
+ENV KROKI_URL=http://kroki:8000
+ENV KROKI_TIMEOUT=30000
+ENV KROKI_MAX_RETRIES=3
+ENV KROKI_USE_LOCAL=true
 ENV LOG_LEVEL=info
 
 # Expose port

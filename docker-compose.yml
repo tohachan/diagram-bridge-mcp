@@ -5,25 +5,28 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: diagram-bridge-mcp
-    restart: "no"
+    restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - KROKI_URL=http://kroki:8000
+      - KROKI_USE_LOCAL=true
+      - KROKI_TIMEOUT=30000
+      - KROKI_MAX_RETRIES=3
+      - KROKI_CLOUD_FALLBACK=false
       - LOG_LEVEL=${LOG_LEVEL:-info}
     depends_on:
       kroki:
         condition: service_healthy
     networks:
       - diagram-network
-    healthcheck:
-      test: ["CMD", "node", "-e", "process.exit(0)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    volumes:
+      - ./generated-diagrams:/app/generated-diagrams
+    stdin_open: true
+    tty: true
+    # Removed healthcheck as MCP server runs as persistent STDIO service
 
   # Kroki Diagram Rendering Service
   kroki:

@@ -1,0 +1,35 @@
+version: '3.8'
+
+# ALTERNATIVE CONFIGURATION FOR CLOUD KROKI USAGE
+# Use this only when you explicitly want to use external Kroki service
+# Command: docker-compose -f docker-compose.cloud.yml up
+
+services:
+  # MCP Diagram Bridge Server (Cloud Mode)
+  diagram-bridge-mcp-cloud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: diagram-bridge-mcp-cloud
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3000"  # Different port to avoid conflicts
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - KROKI_URL=https://kroki.io
+      - KROKI_USE_LOCAL=false
+      - KROKI_CLOUD_FALLBACK=false
+      - KROKI_TIMEOUT=30000
+      - KROKI_MAX_RETRIES=3
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./generated-diagrams:/app/generated-diagrams
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# No Kroki service needed - uses external cloud service

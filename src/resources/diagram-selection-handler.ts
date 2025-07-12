@@ -39,48 +39,22 @@ export class DiagramSelectionHandler {
     }
 
     try {
-      // Determine available formats
-      const availableFormats = input.available_formats || this.getAllSupportedFormats();
-      
       // Check for explicit format preference
+      const availableFormats = input.available_formats || this.getAllSupportedFormats();
       const explicitPreference = this.analyzer.detectExplicitFormatPreference(input.user_request);
       if (explicitPreference && availableFormats.includes(explicitPreference)) {
         return this.generateQuickResponse(input.user_request, explicitPreference);
       }
 
-      // Analyze request and get recommendations
-      const recommendations = this.analyzer.analyzeRequest(input.user_request, availableFormats);
-      
-      // Get format descriptions for available formats
-      const formatDescriptions = availableFormats.map(format => {
-        const config = getFormatConfiguration(format);
-        const characteristics = getFormatCharacteristics(format);
-        return config ? {
-          name: format,
-          displayName: config.displayName,
-          description: config.description,
-          strengths: characteristics?.strengths || [],
-          weaknesses: characteristics?.weaknesses || [],
-          bestFor: characteristics?.bestFor || [],
-          examples: characteristics?.examples || []
-        } : null;
-      }).filter(desc => desc !== null);
-      
-      // Prepare template variables
+      // Prepare simplified template variables (only user request needed now)
       const templateVariables: PromptTemplateVariables = {
         userRequest: input.user_request,
-        availableFormats,
-        formatDescriptions,
-        selectionHeuristics: recommendations
+        availableFormats: [],
+        formatDescriptions: [],
+        selectionHeuristics: []
       };
 
-      // Validate template variables
-      const templateErrors = this.templateEngine.validateTemplateVariables(templateVariables);
-      if (templateErrors.length > 0) {
-        throw new Error(`Template validation failed: ${templateErrors.join(', ')}`);
-      }
-
-      // Generate the prompt
+      // Generate the prompt using simplified template
       const promptText = this.templateEngine.generatePrompt(templateVariables);
 
       return {
@@ -167,35 +141,23 @@ ${formatCharacteristics.strengths.map((strength: string) => `- ${strength}`).joi
         issues.push('Validation failed for valid input');
       }
 
-      // Test analyzer
-      const recommendations = this.analyzer.analyzeRequest('database schema');
-      if (recommendations.length === 0) {
-        issues.push('Analyzer failed to generate recommendations');
+      // Test analyzer for explicit format detection
+      const explicitFormat = this.analyzer.detectExplicitFormatPreference('use mermaid for flowchart');
+      if (explicitFormat !== 'mermaid') {
+        issues.push('Analyzer failed to detect explicit format preference');
       }
 
-      // Test template engine
-      const testFormatConfig = getFormatConfiguration('mermaid');
-      const testFormatCharacteristics = getFormatCharacteristics('mermaid');
-      const testFormatDescription = testFormatConfig && testFormatCharacteristics ? {
-        name: 'mermaid',
-        displayName: testFormatConfig.displayName,
-        description: testFormatConfig.description,
-        strengths: testFormatCharacteristics.strengths,
-        weaknesses: testFormatCharacteristics.weaknesses,
-        bestFor: testFormatCharacteristics.bestFor,
-        examples: testFormatCharacteristics.examples
-      } : null;
-
+      // Test template engine with simplified variables
       const templateVars: PromptTemplateVariables = {
         userRequest: 'test',
-        availableFormats: ['mermaid'],
-        formatDescriptions: testFormatDescription ? [testFormatDescription] : [],
+        availableFormats: [],
+        formatDescriptions: [],
         selectionHeuristics: []
       };
 
-      const templateErrors = this.templateEngine.validateTemplateVariables(templateVars);
-      if (templateErrors.length > 0) {
-        issues.push(`Template validation issues: ${templateErrors.join(', ')}`);
+      const templateResult = this.templateEngine.generatePrompt(templateVars);
+      if (!templateResult || templateResult.length < 100) {
+        issues.push('Template engine failed to generate adequate prompt');
       }
 
     } catch (error) {

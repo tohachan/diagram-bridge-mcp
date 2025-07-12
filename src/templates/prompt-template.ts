@@ -1,46 +1,15 @@
 import { DiagramFormat, DiagramFormatCharacteristics, PromptTemplateVariables, FormatSelectionHeuristic } from '../types/diagram-selection.js';
 import { getSupportedDiagramFormats, getFormatConfiguration } from '../utils/format-validation.js';
+import { FORMAT_SELECTION_HEURISTICS } from '../utils/selection-heuristics.js';
 
 /**
  * Main prompt template for diagram format selection
  */
-const DIAGRAM_SELECTION_PROMPT_TEMPLATE = `# Diagram Format Selection Assistant
+const DIAGRAM_SELECTION_PROMPT_TEMPLATE = `You are an expert systems analyst. Analyze the user's request based on keywords and the following meta-attributes: Formality (informal, semi-formal, formal), Audience (developer, manager, architect), and Data Source (structure-driven, data-driven). Based on this analysis, select the best diagram format from the provided heuristics. Justify your choice briefly.
 
-You are an expert in diagram formats and data visualization. Help choose the most appropriate diagram format for the user's request.
+User Request: "{userRequest}"
 
-## User Request
-{userRequest}
-
-## Available Formats
-{availableFormatsSection}
-
-## Format Analysis
-{formatAnalysisSection}
-
-## Selection Recommendations
-{recommendationsSection}
-
-## Your Task
-Based on the user request and the analysis above, recommend the most suitable diagram format(s). Consider:
-
-1. **Primary recommendation**: The single best format for this specific request
-2. **Alternative options**: 1-2 backup formats that could also work well
-3. **Reasoning**: Clear explanation of why each format is suitable or unsuitable
-
-Provide your response in this format:
-
-**Primary Recommendation:** [Format Name]
-**Reasoning:** [Detailed explanation of why this format is the best choice]
-
-**Alternative Options:**
-- [Format Name]: [Brief reasoning]
-- [Format Name]: [Brief reasoning]
-
-**Key Considerations:**
-- [Any important factors that influenced your decision]
-- [Potential limitations or trade-offs to be aware of]
-
-Choose based on the user's specific needs, technical requirements, and the strengths of each format.`;
+{FORMAT_SELECTION_HEURISTICS}`;
 
 /**
  * Template for format characteristics section
@@ -75,18 +44,53 @@ export class DiagramSelectionPromptTemplate {
    * Generate complete prompt for diagram format selection
    */
   generatePrompt(variables: PromptTemplateVariables): string {
-    const {
-      userRequest,
-      availableFormats,
-      formatDescriptions,
-      selectionHeuristics
-    } = variables;
-
+    const { userRequest } = variables;
+    
+    // Format heuristics data for the prompt
+    const formattedHeuristics = this.formatHeuristicsForPrompt(FORMAT_SELECTION_HEURISTICS);
+    
     return DIAGRAM_SELECTION_PROMPT_TEMPLATE
       .replace('{userRequest}', userRequest)
-      .replace('{availableFormatsSection}', this.generateAvailableFormatsSection(availableFormats))
-      .replace('{formatAnalysisSection}', this.generateFormatAnalysisSection(formatDescriptions))
-      .replace('{recommendationsSection}', this.generateRecommendationsSection(selectionHeuristics));
+      .replace('{FORMAT_SELECTION_HEURISTICS}', formattedHeuristics);
+  }
+
+  /**
+   * Format FORMAT_SELECTION_HEURISTICS array for prompt inclusion
+   */
+  private formatHeuristicsForPrompt(heuristics: FormatSelectionHeuristic[]): string {
+    const groupedHeuristics = this.groupHeuristicsByFormat(heuristics);
+    
+    let formattedText = 'Format Selection Heuristics:\n\n';
+    
+    Object.entries(groupedHeuristics).forEach(([format, formatHeuristics]) => {
+      const config = getFormatConfiguration(format as DiagramFormat);
+      const displayName = config?.displayName || format || 'Unknown';
+      
+      formattedText += `${displayName.toUpperCase()}:\n`;
+      formatHeuristics.forEach(heuristic => {
+        formattedText += `- Keywords: ${heuristic.keywords.join(', ')}\n`;
+        formattedText += `  Confidence: ${Math.round(heuristic.confidence * 100)}%\n`;
+        formattedText += `  Reasoning: ${heuristic.reasoning}\n\n`;
+      });
+    });
+    
+    return formattedText;
+  }
+
+  /**
+   * Group heuristics by diagram format
+   */
+  private groupHeuristicsByFormat(heuristics: FormatSelectionHeuristic[]): Record<string, FormatSelectionHeuristic[]> {
+    const grouped: Record<string, FormatSelectionHeuristic[]> = {};
+    
+    heuristics.forEach(heuristic => {
+      if (!grouped[heuristic.format]) {
+        grouped[heuristic.format] = [];
+      }
+      grouped[heuristic.format]!.push(heuristic);
+    });
+    
+    return grouped;
   }
 
   /**
@@ -164,7 +168,7 @@ export class DiagramSelectionPromptTemplate {
   private generateRecommendationAnalysis(recommendation: FormatSelectionHeuristic): string {
     const confidencePercent = Math.round(recommendation.confidence * 100);
     const config = getFormatConfiguration(recommendation.format);
-    const formatName = config?.displayName || recommendation.format;
+    const formatName = config?.displayName || recommendation.format || 'Unknown';
 
     return RECOMMENDATION_ANALYSIS_TEMPLATE
       .replace('{format}', formatName)

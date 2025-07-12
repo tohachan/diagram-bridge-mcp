@@ -139,8 +139,8 @@ describe('Diagram Selection System', () => {
 
       const prompt = templateEngine.generatePrompt(variables);
       expect(prompt).toContain('Create a database schema');
-      expect(prompt).toContain('Mermaid, ERD');
-      expect(prompt).toContain('Primary Recommendation');
+      expect(prompt).toContain('Format Selection Heuristics');
+      expect(prompt).toContain('expert systems analyst');
       expect(prompt.length).toBeGreaterThan(100);
     });
 

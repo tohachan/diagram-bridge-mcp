@@ -18,10 +18,10 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'Sequence diagrams are one of Mermaid\'s strongest features for API interactions'
   },
   {
-    keywords: ['git', 'branch', 'merge', 'commit', 'version control'],
+    keywords: ['git', 'branch', 'merge', 'commit', 'version control', 'simple diagram', 'quick'],
     format: 'mermaid',
     confidence: 0.8,
-    reasoning: 'Mermaid is well-suited for Git workflow visualization'
+    reasoning: 'Mermaid is well-suited for Git workflow visualization and quick diagrams'
   },
   
   // PlantUML heuristics
@@ -64,7 +64,7 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'D2 provides excellent support for modern infrastructure and container orchestration'
   },
   {
-    keywords: ['technical', 'overview', 'platform', 'ecosystem'],
+    keywords: ['technical', 'overview', 'platform', 'ecosystem', 'modern', 'declarative'],
     format: 'd2',
     confidence: 0.8,
     reasoning: 'D2\'s declarative approach is perfect for high-level technical overviews'
@@ -130,10 +130,10 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'BPMN excels at documenting business processes for optimization and automation'
   },
   {
-    keywords: ['onboarding', 'approval process', 'fulfillment', 'error handling', 'cross-functional'],
+    keywords: ['onboarding', 'approval process', 'fulfillment', 'error handling', 'cross-functional', 'standard notation'],
     format: 'bpmn',
     confidence: 0.85,
-    reasoning: 'BPMN is ideal for complex business processes with multiple participants'
+    reasoning: 'BPMN is ideal for business processes with standard notation requirements'
   },
   
   // C4-PlantUML heuristics
@@ -190,7 +190,7 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'Excalidraw is perfect for low-fidelity sketches and conceptual drawings'
   },
   {
-    keywords: ['collaborative', 'quick', 'simple', 'approachable', 'concept sketch'],
+    keywords: ['collaborative', 'quick', 'simple', 'approachable', 'concept sketch', 'friendly', 'intuitive'],
     format: 'excalidraw',
     confidence: 0.7,
     reasoning: 'Excalidraw provides an approachable way to create simple diagrams'
@@ -210,7 +210,7 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'Vega-Lite excels at business and operational data visualization'
   },
   {
-    keywords: ['interactive', 'data exploration', 'statistical', 'scientific data', 'bar chart', 'line chart'],
+    keywords: ['interactive', 'data exploration', 'statistical', 'scientific data', 'bar chart', 'line chart', 'visualization grammar'],
     format: 'vega-lite',
     confidence: 0.8,
     reasoning: 'Vega-Lite provides comprehensive support for interactive data visualization'
@@ -296,6 +296,11 @@ export class FormatSelectionAnalyzer {
     if (lowercaseRequest.includes('d2')) return 'd2';
     if (lowercaseRequest.includes('graphviz') || lowercaseRequest.includes('dot')) return 'graphviz';
     if (lowercaseRequest.includes('erd') || lowercaseRequest.includes('entity relationship')) return 'erd';
+    if (lowercaseRequest.includes('bpmn')) return 'bpmn';
+    if (lowercaseRequest.includes('c4') || lowercaseRequest.includes('c4-plantuml')) return 'c4-plantuml';
+    if (lowercaseRequest.includes('structurizr')) return 'structurizr';
+    if (lowercaseRequest.includes('excalidraw')) return 'excalidraw';
+    if (lowercaseRequest.includes('vega-lite') || lowercaseRequest.includes('vegalite')) return 'vega-lite';
     
     return null;
   }

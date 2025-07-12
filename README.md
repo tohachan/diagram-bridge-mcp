@@ -48,6 +48,14 @@ Perfect for LLMs that need to create diagrams but don't know which format to use
 | **GraphViz** | Complex graphs, dependencies | Precise layouts, mathematical precision |
 | **ERD** | Database schemas, entity relationships | Database-specific features, cardinality specs |
 
+## 🏗️ Architecture
+
+The Diagram Bridge MCP Server follows a clean, modular architecture designed for scalability and maintainability:
+
+![MCP Server Architecture](./architecture/mcp-server-architecture.svg)
+
+This C4 Container diagram shows the complete system architecture, from MCP protocol handling through to diagram rendering. The server uses a pipeline approach with specialized handlers for format selection, instruction generation, and rendering operations.
+
 ## 🛠️ Installation
 
 ### Prerequisites

@@ -53,8 +53,8 @@ export class DiagramFormatsFactory {
           'Easy to learn and write',
           'Great for flowcharts and sequence diagrams',
           'Built-in support in many platforms (GitHub, GitLab)',
-          'Live editing capabilities',
-          'User journey diagrams'
+          'Wide variety of diagram types',
+          'Live editing capabilities'
         ],
         weaknesses: [
           'Limited customization options',
@@ -219,8 +219,7 @@ export class DiagramFormatsFactory {
         ],
         weaknesses: [
           'Limited output format support (SVG only)',
-          'Newer format with smaller community',
-          'Learning curve for syntax'
+          'Newer format with smaller community'
         ],
         bestFor: [
           'System architecture diagrams',
@@ -373,7 +372,8 @@ export class DiagramFormatsFactory {
         weaknesses: [
           'Limited to database schemas',
           'Less flexible than general diagramming tools',
-          'Specific syntax requirements'
+          'Specific syntax requirements',
+          'No explicit relationship notation like Mermaid'
         ],
         bestFor: [
           'Database schema design',
@@ -395,7 +395,7 @@ export class DiagramFormatsFactory {
           'Primary keys: *id {label: "int, primary key"}',
           'Foreign keys: customer_id {label: "int, foreign key"}',
           'Attributes: name {label: "varchar, not null"}',
-          'Relationships defined by proximity and naming',
+          'Relationships are expressed through foreign key references',
           'Use meaningful entity and attribute names'
         ],
         bestPractices: [
@@ -403,27 +403,32 @@ export class DiagramFormatsFactory {
           'Define all primary keys',
           'Specify data types for attributes',
           'Include constraints (not null, unique)',
-          'Use consistent naming conventions'
+          'Use consistent naming conventions',
+          'Express relationships through foreign key attributes'
         ],
         commonPitfalls: [
           'DO NOT forget primary key definitions',
           'DO NOT use ambiguous entity names',
           'DO NOT omit important relationships',
-          'DO NOT ignore data type specifications'
+          'DO NOT ignore data type specifications',
+          'DO NOT use explicit relationship lines - use foreign key references instead'
         ],
         examplePatterns: [
           '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}',
-          '[Order]\n*id {label: "int, primary key"}\nuser_id {label: "int, foreign key"}'
+          '[Order]\n*id {label: "int, primary key"}\nuser_id {label: "int, foreign key"}\ncreated_at {label: "timestamp"}',
+          '[Product]\n*id {label: "int, primary key"}\ncategory_id {label: "int, foreign key"}\nname {label: "varchar, not null"}'
         ],
         outputSpecifications: [
           'Output ONLY the ERD code without markdown code blocks',
           'Include all entities and relationships',
           'Specify primary and foreign keys',
-          'Include data types and constraints'
+          'Include data types and constraints',
+          'Use simple entity definitions with square brackets [EntityName]',
+          'Express relationships through foreign key attributes only'
         ]
       },
       fileExtensions: ['.er', '.erd'],
-      exampleCode: '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}'
+      exampleCode: '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}\nemail {label: "varchar, unique"}\n\n[Post]\n*id {label: "int, primary key"}\nuser_id {label: "int, foreign key"}\ntitle {label: "varchar, not null"}\ncontent {label: "text"}'
     };
   }
 
@@ -481,50 +486,36 @@ export class DiagramFormatsFactory {
           'DO NOT use XML comments <!-- --> - they cause parsing errors'
         ],
         bestPractices: [
-          'Start with simple single-process diagrams',
           'Use clear, descriptive names for tasks and events',
-          'Keep process flows linear and easy to follow',
-          'Use exclusiveGateway for simple decision points',
           'Ensure all elements have unique IDs',
-          'Test with simple examples before adding complexity',
-          'Focus on single participant processes',
           'Use proper BPMN 2.0 element structure',
-          'Use one gateway per decision point - avoid reusing gateways',
-          'Create clear linear paths without complex cycles',
-          'Validate that every element has proper incoming/outgoing flows',
-          'Design for readability - complex processes can be split into multiple diagrams if needed'
+          'Connect elements with sequenceFlow using sourceRef/targetRef',
+          'Include both process logic and visual diagram sections',
+          'Use appropriate BPMN elements for process steps'
         ],
-              commonPitfalls: [
-        'DO NOT request PNG format - BPMN only supports SVG output',
-        'DO NOT use collaboration and messageFlow - causes validation errors',
-        'DO NOT create multiple processes in single diagram',
-        'DO NOT use complex gateway combinations',
-        'DO NOT forget to connect elements with sequenceFlow',
-        'DO NOT use special characters in element IDs',
-        'DO NOT create processes without start/end events',
-        'DO NOT use unsupported BPMN elements',
-        'DO NOT overcomplicate simple workflows',
-        'DO NOT use XML comments <!-- --> - they break parsing',
-        'DO NOT create complex loops or cycles - they cause validation errors',
-        'DO NOT use same gateway for conflicting decision paths',
-        'DO NOT create elements without proper flow connections'
-      ],
+        commonPitfalls: [
+          'DO NOT request PNG format - BPMN only supports SVG output',
+          'DO NOT forget to connect elements with sequenceFlow',
+          'DO NOT use special characters in element IDs',
+          'DO NOT create processes without start/end events',
+          'DO NOT use XML comments <!-- --> - they break parsing',
+          'DO NOT omit required XML namespaces and structure'
+        ],
         examplePatterns: [
           '<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n  <bpmn:process id="Process_1" isExecutable="false">\n    <bpmn:startEvent id="StartEvent_1" name="Start"/>\n    <bpmn:task id="Task_1" name="Process Request"/>\n    <bpmn:endEvent id="EndEvent_1" name="End"/>\n    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>\n    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="EndEvent_1"/>\n  </bpmn:process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_1">\n    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">\n        <dc:Bounds x="152" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">\n        <dc:Bounds x="240" y="60" width="100" height="80"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">\n        <dc:Bounds x="392" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">\n        <di:waypoint x="188" y="100"/>\n        <di:waypoint x="240" y="100"/>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">\n        <di:waypoint x="340" y="100"/>\n        <di:waypoint x="392" y="100"/>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn:definitions>'
         ],
-              outputSpecifications: [
-        'CRITICAL: BPMN only supports SVG output format - do not request PNG',
-        'Output ONLY valid BPMN 2.0 XML without markdown wrapper',
-        'Always include XML declaration with UTF-8 encoding',
-        'Include ALL four namespaces: bpmn, bpmndi, dc, di',
-        'Add targetNamespace and id attributes to definitions',
-        'Create single bpmn:process with isExecutable="false"',
-        'MANDATORY: Include complete bpmndi:BPMNDiagram section',
-        'Add bpmndi:BPMNShape for every element with dc:Bounds',
-        'Add bpmndi:BPMNEdge for every flow with di:waypoint',
-        'Use proper coordinate positioning for visual layout',
-        'Design comprehensive business processes as needed - complexity is supported'
-      ]
+        outputSpecifications: [
+          'CRITICAL: BPMN only supports SVG output format - do not request PNG',
+          'Output ONLY valid BPMN 2.0 XML without markdown wrapper',
+          'Always include XML declaration with UTF-8 encoding',
+          'Include ALL four namespaces: bpmn, bpmndi, dc, di',
+          'Add targetNamespace and id attributes to definitions',
+          'Create single bpmn:process with isExecutable="false"',
+          'MANDATORY: Include complete bpmndi:BPMNDiagram section',
+          'Add bpmndi:BPMNShape for every element with dc:Bounds',
+          'Add bpmndi:BPMNEdge for every flow with di:waypoint',
+          'Use proper coordinate positioning for visual layout'
+        ]
       },
       fileExtensions: ['.bpmn', '.bpmn2'],
       exampleCode: '<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n  <bpmn:process id="Process_1" isExecutable="false">\n    <bpmn:startEvent id="start" name="Start"/>\n    <bpmn:task id="task" name="Process Request"/>\n    <bpmn:endEvent id="end" name="End"/>\n    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="task"/>\n    <bpmn:sequenceFlow id="flow2" sourceRef="task" targetRef="end"/>\n  </bpmn:process>\n  <bpmndi:BPMNDiagram id="BPMNDiagram_1">\n    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n      <bpmndi:BPMNShape id="start_di" bpmnElement="start">\n        <dc:Bounds x="152" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="task_di" bpmnElement="task">\n        <dc:Bounds x="240" y="60" width="100" height="80"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id="end_di" bpmnElement="end">\n        <dc:Bounds x="392" y="82" width="36" height="36"/>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id="flow1_di" bpmnElement="flow1">\n        <di:waypoint x="188" y="100"/>\n        <di:waypoint x="240" y="100"/>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id="flow2_di" bpmnElement="flow2">\n        <di:waypoint x="340" y="100"/>\n        <di:waypoint x="392" y="100"/>\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn:definitions>'
@@ -651,39 +642,28 @@ export class DiagramFormatsFactory {
           'Define software systems: system = softwareSystem "Name" "Description" { ... }',
           'Define containers: container = container "Name" "Description" "Technology" { ... }',
           'Define components: component = component "Name" "Description" "Technology"',
-          'Define relationships: user -> system "relationship label" (ONCE only per unique pair)',
-          'Group all relationships in one clear section with comments to avoid duplication',
+          'Define relationships: user -> system "relationship label"',
           'Define views: systemContext systemName { include * autoLayout }',
           'Container view: container systemName { include * autoLayout }',
           'Component view: component containerName { include * autoLayout }',
-          'Use comments with # symbol for organization, not relationship duplication'
+          'Use comments with # symbol for organization'
         ],
         bestPractices: [
-          'ALWAYS define multiple views - start with container/component views first for detailed architecture',
-          'Define each relationship ONLY ONCE in the entire model - track connections carefully',
-          'Organize relationships logically in one section to avoid duplication',
+          'Define multiple views for different abstraction levels',
           'Use C4 hierarchy: person -> softwareSystem -> container -> component',
-          'Group into 2-4 logical containers max (Frontend/Backend/Build/Config layers)',
-          'Include technology stratification in descriptions ("React/TypeScript", "Node.js/Vite")',
-          'Component views show actual code structure - use them for implementation details',
-          'Use autoLayout with direction: autoLayout lr (left-right) or tb (top-bottom)',
-          'Add meaningful titles to views: title "Container Architecture"',
-          'Define clear system boundaries and separation of concerns',
-          'Review all relationships before finalizing - ensure no duplicates exist across comment groups'
+          'Include technology descriptions for containers and components',
+          'Use autoLayout with direction: autoLayout lr/tb/bt/rl',
+          'Add meaningful titles to views for clarity',
+          'Group components into logical containers (2-4 max)',
+          'Define clear system boundaries and separation of concerns'
         ],
         commonPitfalls: [
-          'DO NOT duplicate relationships - each connection should be defined ONLY ONCE throughout the entire model',
-          'DO NOT put systemContext view first if you want detailed architecture - use container/component views first',
-          'DO NOT group relationships in comments that repeat the same connections - Kroki will reject duplicate relationships',
-          'DO NOT use only systemContext view - results in oversimplified diagrams',
+          'DO NOT duplicate relationships - define each connection only once',
           'DO NOT create flat structure - use proper C4 hierarchy',
-          'DO NOT define too many containers (>4) - creates visual chaos',
-          'DO NOT omit technology descriptions - unclear component purposes',
+          'DO NOT omit technology descriptions',
           'DO NOT forget autoLayout in views',
           'DO NOT mix different abstraction levels incorrectly',
-          'DO NOT create circular references in relationships',
-          'DO NOT ignore component views for detailed architectural documentation',
-          'DO NOT define the same relationship multiple times even in different comment sections'
+          'DO NOT create circular references in relationships'
         ],
         examplePatterns: [
           'workspace {\n  model {\n    user = person "Developer" "Application developer"\n    system = softwareSystem "Application" {\n      frontend = container "Frontend Layer" "User interface" "React/TypeScript" {\n        pages = component "Pages" "Route components"\n        components = component "Components" "Reusable UI"\n      }\n      backend = container "Backend Layer" "Business logic" "Node.js/Express"\n    }\n    # Define relationships once - no duplicates\n    user -> system "Develops"\n    pages -> components "Uses"\n    frontend -> backend "Calls API"\n  }\n  views {\n    # Container view FIRST for detailed architecture\n    container system { include * autoLayout lr title "Application Architecture" }\n    component frontend { include * autoLayout tb title "Frontend Components" }\n    systemContext system { include * autoLayout title "System Context" }\n  }\n}',
@@ -693,16 +673,12 @@ export class DiagramFormatsFactory {
         outputSpecifications: [
           'Output ONLY the Structurizr DSL code without markdown wrapper',
           'Start with workspace { and end with matching }',
-          'ALWAYS include multiple views - place container/component views FIRST for detailed architecture',
-          'NEVER duplicate relationships - define each connection exactly once in the model',
+          'Include multiple views for different abstraction levels',
           'Use C4 hierarchy: person -> softwareSystem -> container -> component',
-          'Include autoLayout in all view definitions with optional direction (lr/tb/bt/rl)',
+          'Include autoLayout in all view definitions with optional direction',
           'Add descriptive titles to views for clarity',
-          'Group components into 2-4 logical containers maximum',
           'Include technology descriptions for all containers and components',
-          'Use component views to show detailed internal structure',
-          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"',
-          'Organize all relationships in one clear section to prevent duplicates across comment groups'
+          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"'
         ]
       },
       fileExtensions: ['.dsl', '.structurizr'],
@@ -763,15 +739,11 @@ export class DiagramFormatsFactory {
           'Use unique string IDs for all elements'
         ],
         bestPractices: [
-          'ALWAYS include ALL required fields to prevent "Cannot read properties of undefined" errors',
-          'Use fillStyle "solid" for filled shapes, "hachure" for sketchy style',
-          'Set roughness to 1 for balanced hand-drawn aesthetic',
-          'Use opacity 100 for solid elements',
+          'Include ALL required fields to prevent rendering errors',
+          'Use consistent colors and styles',
           'Generate unique random seeds for each element',
           'Keep drawings simple and clear',
-          'Use consistent colors and styles',
-          'Group related elements with groupIds',
-          'Add descriptive text labels with fontSize 12-20',
+          'Add descriptive text labels',
           'Maintain readable proportions'
         ],
         commonPitfalls: [
@@ -824,7 +796,6 @@ export class DiagramFormatsFactory {
         ],
         weaknesses: [
           'Requires understanding of visualization grammar',
-          'Complex syntax for advanced features',
           'JSON verbosity',
           'Limited to data visualization'
         ],

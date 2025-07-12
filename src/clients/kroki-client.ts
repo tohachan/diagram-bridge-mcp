@@ -152,7 +152,19 @@ export class KrokiHttpClient implements KrokiClient {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Read the actual error message from Kroki API
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorBody = await response.text();
+          if (errorBody && errorBody.trim()) {
+            // Include the detailed error message from Kroki
+            errorMessage = `Error ${response.status}: ${errorBody}`;
+          }
+        } catch (readError) {
+          // If we can't read the error body, fall back to status text
+          console.warn('Failed to read error response body:', readError);
+        }
+        throw new Error(errorMessage);
       }
       
       return response;
@@ -235,11 +247,12 @@ export class KrokiHttpClient implements KrokiClient {
    */
   private createRenderingError(error: Error): DiagramRenderingErrorInfo {
     const message = error.message.toLowerCase();
+    const originalMessage = error.message; // Preserve original message
     
     if (message.includes('timeout')) {
       return {
         type: 'TIMEOUT_ERROR' as DiagramRenderingError,
-        message: `Request timeout: ${error.message}`,
+        message: originalMessage, // Use original message for timeout errors
         retryable: true
       };
     }
@@ -247,7 +260,7 @@ export class KrokiHttpClient implements KrokiClient {
     if (message.includes('network') || message.includes('fetch')) {
       return {
         type: 'NETWORK_ERROR' as DiagramRenderingError,
-        message: `Network error: ${error.message}`,
+        message: originalMessage, // Use original message for network errors
         retryable: true
       };
     }
@@ -255,23 +268,25 @@ export class KrokiHttpClient implements KrokiClient {
     if (message.includes('http 5')) {
       return {
         type: 'KROKI_UNAVAILABLE' as DiagramRenderingError,
-        message: `Kroki service error: ${error.message}`,
+        message: originalMessage, // Use original message for server errors
         retryable: true
       };
     }
     
     // Distinguish between syntax errors and size/complexity errors
-    if (message.includes('http 400')) {
+    if (message.includes('http 400') || message.includes('error 400')) {
       // Check for explicit syntax/parsing error indicators
       if (message.includes('parse') || 
           message.includes('syntax') || 
           message.includes('unable to parse') ||
           message.includes('invalid input') ||
           message.includes('valid rank directions') ||
-          message.includes('malformed')) {
+          message.includes('malformed') ||
+          message.includes('relationship') ||
+          message.includes('already exists')) {
         return {
           type: 'SYNTAX_ERROR' as DiagramRenderingError,
-          message: `Invalid diagram syntax: ${error.message}`,
+          message: originalMessage, // Use original detailed message from Kroki
           retryable: false
         };
       }
@@ -284,7 +299,7 @@ export class KrokiHttpClient implements KrokiClient {
           message.includes('413')) {
         return {
           type: 'SIZE_LIMIT_ERROR' as DiagramRenderingError,
-          message: `Diagram too complex or large for API: ${error.message}`,
+          message: originalMessage, // Use original message for size errors
           retryable: false
         };
       }
@@ -292,7 +307,7 @@ export class KrokiHttpClient implements KrokiClient {
       // Default HTTP 400 to syntax error (most common case)
       return {
         type: 'SYNTAX_ERROR' as DiagramRenderingError,
-        message: `Invalid diagram syntax: ${error.message}`,
+        message: originalMessage, // Use original detailed message from Kroki
         retryable: false
       };
     }
@@ -301,14 +316,14 @@ export class KrokiHttpClient implements KrokiClient {
     if (message.includes('http 4') || message.includes('syntax') || message.includes('invalid') || message.includes('malformed')) {
       return {
         type: 'SYNTAX_ERROR' as DiagramRenderingError,
-        message: `Invalid diagram syntax: ${error.message}`,
+        message: originalMessage, // Use original detailed message
         retryable: false
       };
     }
     
     return {
       type: 'UNKNOWN_ERROR' as DiagramRenderingError,
-      message: `Unexpected error: ${error.message}`,
+      message: originalMessage, // Use original message for unknown errors
       retryable: false
     };
   }

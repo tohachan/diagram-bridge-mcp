@@ -1,263 +1,28 @@
 # Diagram Bridge MCP Server
 
-A comprehensive MCP server that provides intelligent diagram format selection AND complete diagram rendering capabilities. From format selection to final image generation - all in one place.
+A comprehensive MCP server that bridges the gap between LLMs and diagram creation through three powerful, independent tools: **intelligent format selection**, **format-specific instruction generation**, and **professional diagram rendering**. Each tool can be used standalone or combined in sequence for complete diagram workflows - from choosing the right format to generating the final image.
 
-## 🚀 Overview
+**Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, ERD, BPMN, Structurizr, Excalidraw, Vega-Lite (12 formats total)
 
-This MCP (Model Context Protocol) server provides a complete diagram workflow solution:
+## 🚀 Quick Start
 
-1. **Intelligent Format Selection** - AI-powered analysis to recommend the best diagram format
-2. **Format-Specific Instructions** - Generated prompts to help LLMs create correct diagram code  
-3. **High-Quality Rendering** - Direct integration with Kroki for professional diagram rendering
+1. **Prerequisites**:
+   - Node.js 18.0 or higher
+   - Docker and Docker Compose
 
-Perfect for LLMs that need to create diagrams but don't know which format to use or how to render them.
-
-## ✨ Features
-
-### 🧠 Intelligent Format Selection
-- **Smart Analysis**: AI-powered keyword analysis and context detection
-- **Format Recommendations**: Confidence-based scoring for optimal format selection
-- **Constraint Support**: Works with available format limitations
-
-### 🎨 Professional Diagram Rendering  
-- **Kroki Integration**: High-quality rendering via self-hosted or public Kroki service
-- **Multiple Output Formats**: PNG and SVG support for all diagram types
-- **Performance Optimized**: LRU caching and <2 second response times
-- **Error Handling**: Comprehensive error classification and retry logic
-
-### 🛠️ Developer Experience
-- **Complete MCP Compliance**: Full Model Context Protocol specification support
-- **TypeScript**: Complete type safety and modern development experience
-- **Docker Ready**: Production-ready containerization with full stack setup
-- **Health Monitoring**: Built-in health checks and performance metrics
-- **Input Validation**: Robust parameter validation and sanitization
-
-### 🔧 Infrastructure
-- **Scalable Architecture**: Microservice-ready with proper separation of concerns
-- **Caching Layer**: LRU cache for performance optimization
-- **Monitoring**: Comprehensive metrics and debugging capabilities
-- **Security**: Input sanitization and malicious content detection
-
-## 🎯 Supported Diagram Formats
-
-| Format | Best For | Strengths |
-|--------|----------|-----------|
-| **Mermaid** | Process flows, sequence diagrams, user journeys | Easy syntax, GitHub support, live editing |
-| **PlantUML** | UML diagrams, software architecture | Complete UML support, professional output |
-| **C4 Model** | Software architecture, system context | Standardized architecture modeling, multiple abstraction levels |
-| **D2** | System architecture, infrastructure layouts | Modern syntax, automatic layouts |
-| **GraphViz** | Complex graphs, network topologies | Precise layouts, mathematical precision |
-| **ERD** | Database schemas, entity relationships | Database-specific features, cardinality specs |
-| **BPMN** | Business processes, workflow automation | Standard business notation, widely recognized |
-| **Structurizr** | C4 model diagrams, architecture documentation | C4 methodology support, multi-level modeling |
-| **Excalidraw** | Brainstorming, concept sketches | Hand-drawn aesthetic, intuitive style |
-| **Vega-Lite** | Data visualization, statistical reports | Powerful visualization grammar, interactive charts |
-
-**Total: 12 supported formats** with multiple aliases for compatibility:
-- **C4 variants**: `c4`, `c4-plantuml`, `c4plantuml` (all point to C4-PlantUML implementation)
-- **Vega-Lite**: `vega-lite` format for data visualization
-
-## 🏗️ Architecture
-
-The Diagram Bridge MCP Server follows a clean, modular architecture designed for scalability and maintainability:
-
-![MCP Server Architecture](./architecture/mcp-server-architecture.svg)
-
-This C4 Container diagram shows the complete system architecture, from MCP protocol handling through to diagram rendering. The server uses a pipeline approach with specialized handlers for format selection, instruction generation, and rendering operations.
-
-## 🛠️ Installation
-
-### Prerequisites
-
-- Node.js 18.0 or higher
-- npm or yarn
-
-### Setup
-
-1. Clone the repository:
+2. **Install and build**:
 ```bash
-git clone <repository-url>
+git clone git@github.com:tohachan/diagram-bridge-mcp.git
 cd diagram-bridge-mcp
+npm install && npm run build
 ```
 
-2. Install dependencies:
+3. **Start services**:
 ```bash
-npm install
-```
-
-3. Build the project:
-```bash
-npm run build
-```
-
-4. Start the server:
-```bash
-npm start
-```
-
-## 🐳 Docker Deployment
-
-### Quick Start with Docker Compose (Recommended)
-
-**Local-First Architecture**: By default, uses local Docker Kroki with no cloud fallback.
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd diagram-bridge-mcp
-
-# Start the complete local stack (MCP server + Kroki services)
 docker-compose up --build
-
-# Access points:
-# - MCP Server: localhost:3000
-# - Kroki Dashboard: localhost:8000
 ```
 
-### Alternative: Cloud Mode (Explicit Override)
-```bash
-# Use external Kroki service (only if local setup isn't suitable)
-docker-compose -f docker-compose.cloud.yml up --build
-```
-
-For detailed Kroki configuration options, see [KROKI_SETUP.md](KROKI_SETUP.md).
-docker-compose up -d
-
-# Check the status
-docker-compose ps
-
-# View logs
-docker-compose logs -f diagram-bridge-mcp
-```
-
-The server will be available at `http://localhost:3000` with full diagram rendering capabilities.
-
-### Development Setup
-
-For development with hot reload:
-
-```bash
-# Start with external Kroki (uses public kroki.io)
-docker-compose -f docker-compose.dev.yml up -d
-
-# Or with local Kroki service
-docker-compose -f docker-compose.dev.yml --profile local-kroki up -d
-```
-
-### Production Deployment
-
-#### Option 1: Full Stack with Local Kroki
-```bash
-# Production setup with all services
-docker-compose up -d
-
-# Includes:
-# - diagram-bridge-mcp (main server)
-# - kroki (diagram rendering service)  
-# - mermaid, blockdiag, bpmn, excalidraw (rendering engines)
-```
-
-#### Option 2: Standalone with External Kroki
-```bash
-# Build the image
-docker build -t diagram-bridge-mcp .
-
-# Run with external Kroki service
-docker run -d \
-  --name diagram-bridge-mcp \
-  -p 3000:3000 \
-  -e KROKI_URL=https://kroki.io \
-  -e NODE_ENV=production \
-  diagram-bridge-mcp
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `production` | Runtime environment |
-| `PORT` | `3000` | Server port |
-| `KROKI_URL` | `https://kroki.io` | Kroki service URL |
-| `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
-| `DIAGRAM_STORAGE_PATH` | `{project-root}/generated-diagrams` | Directory for storing rendered diagram files |
-
-### Docker Services Overview
-
-#### Complete Stack (`docker-compose.yml`)
-- **diagram-bridge-mcp**: Main MCP server
-- **kroki**: Core diagram rendering service
-- **mermaid**: Mermaid diagram rendering engine
-- **blockdiag**: BlockDiag family diagram engine
-- **bpmn**: BPMN diagram rendering engine  
-- **excalidraw**: Excalidraw diagram rendering engine
-
-#### Service URLs
-- MCP Server: `http://localhost:3000`
-- Kroki Service: `http://localhost:8000`
-- Health Check: `http://localhost:3000/health` (when implemented)
-
-### Health Monitoring
-
-```bash
-# Check service health
-curl http://localhost:3000/health
-
-# Get metrics
-curl http://localhost:3000/metrics
-
-# Check Kroki connectivity
-curl http://localhost:8000/health
-```
-
-### Troubleshooting
-
-**Common Issues:**
-
-1. **Port conflicts**: Change ports in docker-compose.yml or use environment variables
-2. **Kroki service unavailable**: Check `docker-compose logs kroki`
-3. **Memory issues**: Adjust container limits in docker-compose.yml
-4. **Slow rendering**: Check cache settings and Kroki service health
-
-**Debug Commands:**
-```bash
-# View all service logs
-docker-compose logs
-
-# Check specific service
-docker-compose logs diagram-bridge-mcp
-
-# Restart services
-docker-compose restart
-
-# Clean rebuild
-docker-compose down && docker-compose build --no-cache && docker-compose up -d
-```
-
-## 📖 Usage
-
-### As an MCP Server
-
-The server provides comprehensive MCP capabilities for the complete diagram workflow:
-
-#### Tools
-- `help_choose_diagram`: Generate structured prompts for diagram format selection
-- `get_diagram_instructions`: Generate format-specific instruction prompts for diagram code creation
-- `render_diagram`: Render diagram source code into images via Kroki service
-
-#### Resources
-- `diagram_selection_health`: Health check for diagram selection service
-- `diagram_selection_metrics`: Performance metrics for format selection
-- `diagram_format_catalog`: Complete catalog of supported formats
-- `diagram_instructions_health`: Health check for diagram instructions service  
-- `diagram_instructions_metrics`: Performance metrics for instruction generation
-- `diagram_rendering_health`: Health check for diagram rendering service
-- `diagram_rendering_metrics`: Performance metrics for diagram rendering (cache stats, Kroki connectivity)
-
-#### Adding to Cursor
-
-To use this MCP server with Cursor, add the following configuration to your Cursor settings:
-
-**Option 1: Using npm start (Development) - Recommended**
+4. **Add to Cursor** (or any MCP client):
 ```json
 {
   "mcpServers": {
@@ -270,502 +35,75 @@ To use this MCP server with Cursor, add the following configuration to your Curs
 }
 ```
 
-**Option 2: Using node directly (Production)**
-```json
-{
-  "mcpServers": {
-    "diagram-bridge": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "cwd": "/path/to/diagram-bridge-mcp"
-    }
-  }
-}
-```
+5. **Start using**: The server provides three MCP tools ready for use!
 
-**Option 3: With explicit storage path (if auto-detection fails)**
-```json
-{
-  "mcpServers": {
-    "diagram-bridge": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "cwd": "/path/to/diagram-bridge-mcp",
-      "env": {
-        "DIAGRAM_STORAGE_PATH": "/path/to/diagram-bridge-mcp/generated-diagrams"
-      }
-    }
-  }
-}
-```
-    }
-  }
-}
-```
+## 💡 Usage Example
 
-**Option 3: Global installation**
-```bash
-# First, install globally
-npm install -g diagram-bridge-mcp
-
-# Then use in Cursor config:
-```
-```json
-{
-  "mcpServers": {
-    "diagram-bridge": {
-      "command": "diagram-bridge-mcp"
-    }
-  }
-}
-```
-
-Replace `/path/to/diagram-bridge-mcp` with the actual path to your cloned repository.
-
-### Custom Storage Configuration
-
-By default, rendered diagram files are saved to `{project-root}/generated-diagrams/` with absolute file paths. The project root is automatically detected by searching for `package.json` file. You can customize this location using the `DIAGRAM_STORAGE_PATH` environment variable.
-
-**Default behavior:**
-```json
-{
-  "success": true,
-  "file_path": "/Users/you/projects/diagram-bridge-mcp/generated-diagrams/diagram-mermaid-1234567890.png",
-  "resource_uri": "diagram://saved/diagram-mermaid-1234567890.png",
-  "content_type": "image/png",
-  "file_size": 45678,
-  "message": "Diagram rendered successfully... ⚠️ IMPORTANT: Do not attempt to read or analyze the contents of generated image files (especially SVG). These are binary/encoded image data meant for display, not text processing. Simply copy and use the file path or resource URI as needed."
-}
-```
-
-> **⚠️ Important Usage Note**: Generated image files (PNG/SVG) contain binary or encoded image data and should **NOT** be read or analyzed as text. LLMs should only use the provided `file_path` or `resource_uri` for file operations, not attempt to process the image contents.
-
-**Custom storage path:**
-```bash
-# Set custom storage directory
-export DIAGRAM_STORAGE_PATH="/tmp/my-diagrams"
-
-# Or use relative path (resolved to absolute)
-export DIAGRAM_STORAGE_PATH="./custom-diagrams"
-
-# Start server with custom path
-npm start
-```
-
-**With custom path, responses include:**
-```json
-{
-  "success": true,
-  "file_path": "/tmp/my-diagrams/diagram-mermaid-1234567890.png",
-  "resource_uri": "diagram://saved/diagram-mermaid-1234567890.png",
-  "content_type": "image/png", 
-  "file_size": 45678
-}
-```
-
-**Using in Cursor with custom path:**
-```json
-{
-  "mcpServers": {
-    "diagram-bridge": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "cwd": "/path/to/diagram-bridge-mcp",
-      "env": {
-        "DIAGRAM_STORAGE_PATH": "/Users/you/Documents/diagrams"
-      }
-    }
-  }
-}
-```
-
-This ensures LLMs can easily copy and manipulate the generated files using their absolute paths.
-
-### Example Usage
-
-#### 1. Format Selection (help_choose_diagram)
-```json
-{
-  "user_request": "I need to visualize the authentication flow in my web application"
-}
-```
-
-#### 2. Format Selection with Constraints  
-```json
-{
-  "user_request": "Create a database schema for an e-commerce system",
-  "available_formats": ["erd", "plantuml", "c4"]
-}
-```
-
-#### 3. Get Format-Specific Instructions (get_diagram_instructions)
-```json
-{
-  "user_request": "Create a microservices architecture diagram", 
-  "diagram_format": "c4"
-}
-```
-
-#### 4. Render Diagram to Image (render_diagram)
-```json
-{
-  "code": "flowchart TD\n    A[User] --> B{Login?}\n    B -->|Yes| C[Dashboard]\n    B -->|No| D[Register]",
-  "diagram_format": "mermaid",
-  "output_format": "png"
-}
-```
-
-#### 5. Complete Workflow Example
-```json
-// Step 1: Choose format
-{"user_request": "API authentication flow"}
-
-// Step 2: Get instructions for chosen format  
-{"user_request": "API authentication flow", "diagram_format": "mermaid"}
-
-// Step 3: Render the generated diagram code
-{
-  "code": "sequenceDiagram\n    Client->>API: Login Request\n    API->>Client: JWT Token",
-  "diagram_format": "mermaid",
-  "output_format": "svg"
-}
-```
-
-#### Response Examples
-
-**Format Selection Response:**
-```text
-# Diagram Format Selection Assistant
-
-You are an expert in diagram formats and data visualization...
-
-## User Request
-I need to visualize the authentication flow in my web application
-
-## Available Formats
-Mermaid, PlantUML, D2, GraphViz, ERD
-
-## Format Analysis
-[Detailed analysis of each format...]
-
-## Selection Recommendations
-### AI Analysis Recommendations
-Based on keyword analysis:
-- Mermaid (Confidence: 90%): Excellent for sequence diagrams and API flows
-- PlantUML (Confidence: 75%): Good for complex authentication workflows
-
-## Your Task
-[Instructions for the LLM to make the final recommendation...]
-```
-
-**Diagram Rendering Response:**
-```json
-{
-  "image_data": "iVBORw0KGgoAAAANSUhEUgAAA...", 
-  "content_type": "image/png",
-  "success": true
-}
-```
-
-**Error Response:**
-```json
-{
-  "error": "Invalid diagram syntax: Expected 'flowchart' but found 'flowchar'",
-  "error_type": "SYNTAX_ERROR", 
-  "retryable": false,
-  "success": false
-}
-```
-
-## 🧪 Testing
-
-Run the comprehensive test suite:
-
-```bash
-# Run all tests (unit + integration)
-npm test
-
-# Run only unit tests
-npm test -- src/__tests__/diagram-selection.test.ts
-
-# Run only Docker integration tests (requires Docker)
-npm test -- src/__tests__/docker-rendering.test.ts
-```
-
-The test suite includes:
-
-**Unit Tests:**
-- Input validation tests
-- Format selection analysis tests
-- Template generation tests
-- Health check and metrics tests
-- 19 test cases covering core functionality
-
-**Docker Integration Tests:**
-- Real diagram rendering through Kroki services
-- All 12+ diagram formats validation
-- PNG/SVG output format testing
-- Performance and reliability testing
-- 15 test cases covering end-to-end workflows
-
-Combined test coverage includes 34+ test cases covering all functionality from format selection to diagram rendering.
-
-## 🔧 Development
-
-### Scripts
-
-- `npm run build`: Build TypeScript to JavaScript
-- `npm run dev`: Run in development mode with auto-reload
-- `npm start`: Start the production server
-- `npm test`: Run the test suite
-- `npm run test:watch`: Run tests in watch mode
-- `npm run clean`: Clean build artifacts
-
-### Docker Integration Testing
-
-For comprehensive testing of all diagram formats with actual rendering through Kroki services:
-
-```bash
-# Start Docker environment with all Kroki services
-docker-compose up -d
-
-# Run Docker integration tests (requires Docker to be running)
-npm test -- src/__tests__/docker-rendering.test.ts
-
-# Run with verbose output to see detailed test results
-npm test -- src/__tests__/docker-rendering.test.ts --verbose
-
-# Run specific test groups
-npm test -- --testNamePattern="Mermaid rendering"
-npm test -- --testNamePattern="Format Validation"
-```
-
-**What the Docker tests cover:**
-- ✅ All 12+ diagram formats with actual Kroki rendering
-- ✅ PNG and SVG output validation (where supported)
-- ✅ Health checks for Kroki service connectivity
-- ✅ Format-specific rendering with example diagrams
-- ✅ Comprehensive format validation against real Kroki API
-- ✅ Performance and reliability testing
-- ✅ Error handling and edge cases
-
-**Docker test requirements:**
-- Docker and Docker Compose installed
-- All Kroki services running (`docker-compose up -d`)
-- Network connectivity to Kroki services
-- ~4 seconds execution time for full test suite
-
-**Test outputs:**
-- Generated diagram files in `generated-diagrams/` directory
-- Detailed test reports with format-specific results
-- Issues logged in `ISSUES.md` for any discovered problems
-- 100% success rate with 15/15 tests passing
-
-### Project Structure
+Here's a simple prompt to demonstrate the complete workflow:
 
 ```
-src/
-├── types/              # TypeScript type definitions
-│   └── diagram-selection.ts
-├── resources/          # MCP resource configurations
-│   ├── diagram-selection-config.ts
-│   ├── diagram-selection-handler.ts
-│   └── diagram-selection-schema.ts
-├── templates/          # Prompt template engine
-│   └── prompt-template.ts
-├── utils/              # Utility functions
-│   ├── selection-heuristics.ts
-│   └── validation.ts
-├── __tests__/          # Test files
-│   ├── diagram-selection.test.ts    # Unit tests for format selection
-│   └── docker-rendering.test.ts     # Docker integration tests for all formats
-└── index.ts           # Main server entry point
+"Choose the best diagram format for visualizing a current project architecture, then generate the diagram code and render it to an image file. Save the result as 'architecture-diagram'."
 ```
 
-## 🧠 How It Works
+This single prompt will:
+1. **Analyze your request** and recommend the optimal format
+2. **Get specific instructions** for creating the diagram in that format
+3. **Create and render** the final diagram to a PNG/SVG file
 
-### 1. Request Analysis
-The server analyzes user requests using keyword-based heuristics to identify:
-- Domain context (database, API, architecture, etc.)
-- Diagram type hints (sequence, class, flow, etc.)
-- Explicit format preferences
-- Complexity indicators
+## 🛠️ Tools Overview
 
-### 2. Format Scoring
-Each format receives a confidence score based on:
-- Keyword matches in the user request
-- Format strengths and capabilities
-- Use case alignment
-- Available format constraints
+### `help_choose_diagram`
+**Purpose**: Intelligent format selection based on your requirements
 
-### 3. Prompt Generation
-The template engine creates structured prompts that include:
-- User request context
-- Available format options
-- Detailed format analysis
-- AI-generated recommendations
-- Clear decision framework
+- Analyzes your request using AI-powered heuristics
+- Provides confidence-scored recommendations  
+- Works with format constraints when needed
+- Generates structured prompts for optimal LLM decision-making
 
-### 4. LLM Integration
-The generated prompt provides LLMs with:
-- Comprehensive format knowledge
-- Decision-making criteria
-- Structured response format
-- Reasoning guidelines
+**Example**: "I need to show database relationships" → Recommends ERD format with detailed reasoning
+
+### `get_diagram_instructions`  
+**Purpose**: Generate format-specific coding instructions
+
+- Creates tailored prompts for any supported diagram format
+- Includes syntax guidelines, best practices, and common pitfalls
+- Provides working examples and output specifications
+- Ensures LLMs generate syntactically correct diagram code
+
+**Example**: For Mermaid format → Detailed Mermaid syntax guide with examples
+
+### `render_diagram`
+**Purpose**: Transform diagram code into professional images
+
+- Renders diagrams via integrated Kroki service  
+- Supports PNG and SVG output formats
+- Includes intelligent caching for performance
+- Provides file storage with absolute paths for easy access
+
+**Example**: Mermaid code → High-quality PNG/SVG image file
 
 ## ⚙️ Configuration
 
-### Environment Variables
+### Basic Setup
+- **Default storage**: `{project-root}/generated-diagrams/`
+- **Default Kroki**: Uses local Docker Kroki service
+- **Default port**: 3000
 
-- `PORT`: HTTP server port (default: 3000)
-- `NODE_ENV`: Environment mode (development/production)
+For advanced configuration, see our [Configuration Guide](docs/configuration.md).
 
-### Format Customization
+## 📚 Documentation
 
-Extend the format definitions in `src/resources/diagram-selection-config.ts` to:
-- Add new diagram formats
-- Customize format characteristics
-- Adjust selection heuristics
-- Modify format descriptions
-
-## 🔍 API Reference
-
-### MCP Tool: help_choose_diagram
-
-**Input Schema:**
-```typescript
-{
-  user_request: string;        // Required: User's visualization request
-  available_formats?: string[]; // Optional: Subset of supported formats
-}
-```
-
-**Output Schema:**
-```typescript
-{
-  prompt_text: string;         // Generated structured prompt
-}
-```
-
-### MCP Tool: get_diagram_instructions
-
-**Input Schema:**
-```typescript
-{
-  user_request: string;        // Required: Original diagram request
-  diagram_format: string;      // Required: Target format (mermaid|plantuml|c4|d2|graphviz|erd|bpmn|structurizr|excalidraw|vega-lite)
-}
-```
-
-**Output Schema:**
-```typescript
-{
-  prompt_text: string;         // Format-specific instruction prompt
-}
-```
-
-### MCP Tool: render_diagram
-
-**Input Schema:**
-```typescript
-{
-  code: string;               // Required: Diagram source code (1-100,000 chars)
-  diagram_format: string;     // Required: Format (mermaid|plantuml|c4|d2|graphviz|erd|bpmn|structurizr|excalidraw|vega-lite)
-  output_format?: string;     // Optional: Output format (png|svg, default: png)
-}
-```
-
-**Output Schema:**
-```typescript
-{
-  image_data: string;         // Base64 encoded image data
-  content_type: string;       // MIME type (image/png | image/svg+xml)
-  success: boolean;           // Rendering success status
-}
-```
-
-**Error Response:**
-```typescript
-{
-  error: string;              // Error message
-  error_type: string;         // Error classification
-  retryable: boolean;         // Whether error is retryable
-  success: false;             // Always false for errors
-}
-```
-
-### Health Check Resource
-
-**Endpoint:** `diagram_selection_health`
-**Response:** System health status and component checks
-
-### Metrics Resource
-
-**Endpoint:** `diagram_selection_metrics`
-**Response:** Performance metrics and usage statistics
-
-### Format Catalog Resource
-
-**Endpoint:** `diagram_format_catalog`
-**Response:** Complete catalog of supported formats
-
-## 🔒 Security
-
-- Input validation and sanitization
-- Malicious content detection
-- Parameter length limits
-- Format whitelist validation
-- Error message sanitization
-
-## 📊 Performance
-
-### Format Selection & Instructions
-- Response time target: <100ms for format analysis
-- Memory efficient processing with optimized algorithms
-- Caching of format definitions and templates
-- Optimized template rendering pipeline
-
-### Diagram Rendering  
-- Response time target: <2 seconds for diagram rendering
-- LRU caching for identical diagram requests
-- Efficient Base64 encoding/decoding
-- Retry logic with exponential backoff
-- Memory optimization for container deployment
-
-### Infrastructure
-- Health checks and monitoring endpoints
-- Comprehensive error handling and classification
-- Resource usage optimization
-- Concurrent request handling
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-## 📝 License
-
-MIT License - see LICENSE file for details.
-
-## 🔗 Related Projects
-
-- [Model Context Protocol](https://github.com/modelcontextprotocol) - The official MCP specification
-- [Mermaid](https://mermaid.js.org/) - Diagram and flowchart generation
-- [PlantUML](https://plantuml.com/) - UML diagram generation
-- [D2](https://d2lang.com/) - Modern diagram scripting language
-- [GraphViz](https://graphviz.org/) - Graph visualization software
-
-## 📞 Support
-
-For questions, issues, or contributions:
-- Open an issue on GitHub
-- Check the documentation
-- Review existing discussions
+- **[Installation Guide](docs/installation.md)** - Detailed setup instructions
+- **[Docker Deployment](docs/docker-deployment.md)** - Container deployment options  
+- **[API Reference](docs/api-reference.md)** - Complete tool and resource documentation
+- **[Configuration Guide](docs/configuration.md)** - Environment variables and customization
+- **[Development Guide](docs/development.md)** - Contributing and development setup
+- **[Architecture](docs/architecture.md)** - System architecture and design patterns
+- **[Performance & Security](docs/performance.md)** - Performance metrics and security features  
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
 
 ---
 
-**Made with ❤️ for the LLM and diagram generation community**
+**Perfect for**: LLMs that need to create diagrams but don't know which format to use or how to render them professionally.
+
+**Made with ❤️**

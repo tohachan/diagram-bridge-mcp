@@ -1,8 +1,8 @@
 # Diagram Bridge MCP Server
 
-A comprehensive MCP server that bridges the gap between LLMs and diagram creation through three powerful, independent tools: **intelligent format selection**, **format-specific instruction generation**, and **professional diagram rendering**. Each tool can be used standalone or combined in sequence for complete diagram workflows - from choosing the right format to generating the final image.
+A comprehensive MCP server that bridges the gap between LLMs and diagram creation through three powerful, independent tools: **intelligent format selection**, **format-specific instruction generation**, and **professional diagram rendering** (using kroki server). Each tool can be used standalone or combined in sequence for complete diagram workflows - from choosing the right format to generating the final image.
 
-**Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, ERD, BPMN, Structurizr, Excalidraw, Vega-Lite (12 formats total)
+**Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, ERD, BPMN, Structurizr, Excalidraw, Vega-Lite
 
 ## 🚀 Quick Start
 
@@ -105,5 +105,7 @@ For advanced configuration, see our [Configuration Guide](docs/configuration.md)
 ---
 
 **Perfect for**: LLMs that need to create diagrams but don't know which format to use or how to render them professionally.
+
+**Powered by**: [Kroki](https://kroki.io) - Universal diagram rendering service
 
 **Made with ❤️**

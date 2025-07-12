@@ -1,6 +1,6 @@
 import { KrokiHttpClient } from '../clients/kroki-client.js';
 import { DiagramFormatsManager } from '../config/diagram-formats-manager.js';
-import { getDiagramFilePath } from '../utils/file-path.js';
+import { getDiagramFilePath, getDiagramStorageBasePath, findProjectRoot } from '../utils/file-path.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -18,7 +18,7 @@ describe('Docker Rendering Integration Tests', () => {
   });
   
   const formatsManager = DiagramFormatsManager.getInstance();
-  const issuesFile = path.join(process.cwd(), 'ISSUES.md');
+  const issuesFile = path.join(findProjectRoot(), 'ISSUES.md');
   
   // Helper function to safely get error message
   function getErrorMessage(error: unknown): string {
@@ -37,7 +37,7 @@ describe('Docker Rendering Integration Tests', () => {
   
   // Ensure output directory exists
   beforeAll(async () => {
-    const outputDir = path.join(process.cwd(), 'generated-diagrams');
+    const outputDir = getDiagramStorageBasePath();
     try {
       await fs.mkdir(outputDir, { recursive: true });
     } catch (error) {

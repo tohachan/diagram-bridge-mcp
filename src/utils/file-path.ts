@@ -1,10 +1,101 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import * as fsSync from 'fs';
+import { fileURLToPath } from 'url';
+
+/**
+ * Find the project root directory by looking for package.json
+ * Uses multiple strategies to locate the project root:
+ * 1. From the current script location (works when file is in dist/utils/)
+ * 2. From provided start directory
+ * 3. From current working directory
+ * 4. Fallback to current working directory
+ */
+export function findProjectRoot(startDir?: string): string {
+  // Strategy 1: Try to find project root from current script location
+  // This works when this file is compiled to dist/utils/file-path.js
+  try {
+    // In the compiled version, this file should be at dist/utils/file-path.js
+    // So the project root should be 2 levels up
+    const scriptDir = getCurrentFileDir();
+    const possibleProjectRoot = path.resolve(scriptDir, '..', '..');
+    
+    if (fsSync.existsSync(path.join(possibleProjectRoot, 'package.json'))) {
+      return possibleProjectRoot;
+    }
+  } catch (error) {
+    // Continue to next strategy
+  }
+  
+  // Strategy 2: Search from provided start directory
+  if (startDir) {
+    const found = searchForProjectRoot(startDir);
+    if (found) return found;
+  }
+  
+  // Strategy 3: Search from current working directory
+  const found = searchForProjectRoot(process.cwd());
+  if (found) return found;
+  
+  // Strategy 4: Ultimate fallback
+  return process.cwd();
+}
+
+/**
+ * Get the directory containing this source file
+ * Uses different methods for ESM and CommonJS
+ */
+function getCurrentFileDir(): string {
+  try {
+    // For ESM modules (when import.meta.url is available)
+    if (typeof import.meta !== 'undefined' && import.meta.url) {
+      const currentFile = fileURLToPath(import.meta.url);
+      return path.dirname(currentFile);
+    }
+  } catch (error) {
+    // Fall through to next method
+  }
+  
+  try {
+    // For CommonJS modules (when __dirname is available)
+    if (typeof __dirname !== 'undefined') {
+      return __dirname;
+    }
+  } catch (error) {
+    // Fall through to next method
+  }
+  
+  // Fallback to current working directory
+  return process.cwd();
+}
+
+/**
+ * Search for project root starting from a given directory
+ * @param startDir - Directory to start searching from
+ * @returns Project root path or null if not found
+ */
+function searchForProjectRoot(startDir: string): string | null {
+  let currentDir = path.resolve(startDir);
+  
+  while (currentDir !== path.dirname(currentDir)) {
+    try {
+      const packageJsonPath = path.join(currentDir, 'package.json');
+      if (fsSync.existsSync(packageJsonPath)) {
+        return currentDir;
+      }
+    } catch (error) {
+      // Continue searching if package.json doesn't exist or can't be read
+    }
+    currentDir = path.dirname(currentDir);
+  }
+  
+  return null;
+}
 
 /**
  * Get the base directory for storing diagram files
  * Uses DIAGRAM_STORAGE_PATH environment variable if set,
- * otherwise defaults to 'generated-diagrams' in current working directory
+ * otherwise defaults to 'generated-diagrams' in project root directory
  */
 export function getDiagramStorageBasePath(): string {
   const envPath = process.env.DIAGRAM_STORAGE_PATH;
@@ -14,8 +105,9 @@ export function getDiagramStorageBasePath(): string {
     return path.resolve(envPath);
   }
   
-  // Default: absolute path to generated-diagrams in current working directory
-  return path.resolve(process.cwd(), 'generated-diagrams');
+  // Default: absolute path to generated-diagrams in project root directory
+  const projectRoot = findProjectRoot();
+  return path.resolve(projectRoot, 'generated-diagrams');
 }
 
 /**

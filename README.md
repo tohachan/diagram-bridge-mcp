@@ -179,7 +179,7 @@ docker run -d \
 | `PORT` | `3000` | Server port |
 | `KROKI_URL` | `https://kroki.io` | Kroki service URL |
 | `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
-| `DIAGRAM_STORAGE_PATH` | `{cwd}/generated-diagrams` | Directory for storing rendered diagram files |
+| `DIAGRAM_STORAGE_PATH` | `{project-root}/generated-diagrams` | Directory for storing rendered diagram files |
 
 ### Docker Services Overview
 
@@ -257,7 +257,7 @@ The server provides comprehensive MCP capabilities for the complete diagram work
 
 To use this MCP server with Cursor, add the following configuration to your Cursor settings:
 
-**Option 1: Using npm start (Development)**
+**Option 1: Using npm start (Development) - Recommended**
 ```json
 {
   "mcpServers": {
@@ -278,6 +278,26 @@ To use this MCP server with Cursor, add the following configuration to your Curs
       "command": "node",
       "args": ["dist/index.js"],
       "cwd": "/path/to/diagram-bridge-mcp"
+    }
+  }
+}
+```
+
+**Option 3: With explicit storage path (if auto-detection fails)**
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "/path/to/diagram-bridge-mcp",
+      "env": {
+        "DIAGRAM_STORAGE_PATH": "/path/to/diagram-bridge-mcp/generated-diagrams"
+      }
+    }
+  }
+}
+```
     }
   }
 }
@@ -304,7 +324,7 @@ Replace `/path/to/diagram-bridge-mcp` with the actual path to your cloned reposi
 
 ### Custom Storage Configuration
 
-By default, rendered diagram files are saved to `{current-working-directory}/generated-diagrams/` with absolute file paths. You can customize this location using the `DIAGRAM_STORAGE_PATH` environment variable.
+By default, rendered diagram files are saved to `{project-root}/generated-diagrams/` with absolute file paths. The project root is automatically detected by searching for `package.json` file. You can customize this location using the `DIAGRAM_STORAGE_PATH` environment variable.
 
 **Default behavior:**
 ```json

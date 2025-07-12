@@ -4,6 +4,9 @@ A comprehensive MCP server that bridges the gap between LLMs and diagram creatio
 
 **Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, ERD, BPMN, Structurizr, Excalidraw, Vega-Lite
 
+![Demo](docs/diagram-briedge-mcp.gif)
+
+
 ## 🚀 Quick Start
 
 1. **Prerequisites**:

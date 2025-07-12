@@ -219,7 +219,7 @@ describe('Diagram Instructions System', () => {
       
       expect(excalidrawInstructions).toContain('Supported Image Formats');
       expect(excalidrawInstructions).toContain('SVG');
-      expect(excalidrawInstructions).not.toContain('PNG');
+      expect(excalidrawInstructions).not.toContain('PNG, SVG');
       
       // Test D2 (SVG only)
       const d2Instructions = templateEngine.generateInstructionPrompt({
@@ -229,7 +229,7 @@ describe('Diagram Instructions System', () => {
       
       expect(d2Instructions).toContain('Supported Image Formats');
       expect(d2Instructions).toContain('SVG');
-      expect(d2Instructions).not.toContain('PNG');
+      expect(d2Instructions).not.toContain('PNG, SVG');
       
       // Test PlantUML (PNG, SVG)
       const plantumlInstructions = templateEngine.generateInstructionPrompt({
@@ -281,7 +281,7 @@ describe('Diagram Instructions System', () => {
     });
 
     it('should handle all supported formats', async () => {
-      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'];
+      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite'];
       
       for (const format of formats) {
         const input = {
@@ -323,15 +323,15 @@ describe('Diagram Instructions System', () => {
     it('should provide metrics', async () => {
       const metrics = await handler.getMetrics();
       
-      expect(metrics.supportedFormats).toBe(10);
+      expect(metrics.supportedFormats).toBe(12);
       expect(metrics.validationRules).toBe(4);
-      expect(Object.keys(metrics.templateSize)).toHaveLength(10);
+      expect(Object.keys(metrics.templateSize)).toHaveLength(12);
     });
 
     it('should get all supported formats', () => {
       const formats = handler.getAllSupportedFormats();
       
-      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite']);
+      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite']);
     });
 
     it('should get format template information', () => {

@@ -268,7 +268,8 @@ export class DiagramFormatsFactory {
           'Output ONLY the D2 code without markdown code blocks',
           'Use proper D2 syntax',
           'Include necessary styling and structure',
-          'Ensure all connections are properly defined'
+          'Ensure all connections are properly defined',
+          'IMPORTANT: D2 only supports SVG output format - do not request PNG'
         ]
       },
       fileExtensions: ['.d2'],
@@ -708,7 +709,8 @@ export class DiagramFormatsFactory {
           'Include autoLayout in all view definitions with optional direction',
           'Add descriptive titles to views for clarity',
           'Include technology descriptions for all containers and components',
-          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"'
+          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"',
+          'IMPORTANT: Structurizr only supports SVG output format - do not request PNG'
         ]
       },
       fileExtensions: ['.dsl', '.structurizr'],
@@ -797,7 +799,8 @@ export class DiagramFormatsFactory {
           'MANDATORY: Each element must have ALL required fields including fillStyle, strokeStyle, roughness, opacity, seed',
           'Define complete element objects with unique IDs',
           'Use proper coordinate positioning and valid field values',
-          'Generate random seeds for consistent rendering'
+          'Generate random seeds for consistent rendering',
+          'IMPORTANT: Excalidraw only supports SVG output format - do not request PNG'
         ]
       },
       fileExtensions: ['.excalidraw', '.json'],
@@ -872,7 +875,8 @@ export class DiagramFormatsFactory {
           'Output ONLY valid Vega-Lite JSON',
           'Include schema reference',
           'Define data, mark, and encoding',
-          'Use proper field type mappings'
+          'Use proper field type mappings',
+          'IMPORTANT: Vega-Lite only supports SVG output format - do not request PNG'
         ]
       },
       fileExtensions: ['.vl.json', '.vega'],

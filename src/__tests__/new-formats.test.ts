@@ -33,9 +33,9 @@ describe('New Diagram Formats Integration', () => {
       }
     });
 
-    test('should have updated default registry with all 10 formats', () => {
+    test('should have updated default registry with all 12 formats', () => {
       const registry = DiagramFormatsFactory.createDefaultRegistry();
-      expect(Object.keys(registry.formats)).toHaveLength(10);
+      expect(Object.keys(registry.formats)).toHaveLength(12);
       expect(registry.version).toBe('2.0.0');
       
       // Check original formats still exist
@@ -55,7 +55,7 @@ describe('New Diagram Formats Integration', () => {
 
     test('should have updated getSupportedFormatIds to include new formats', () => {
       const supportedIds = DiagramFormatsFactory.getSupportedFormatIds();
-      expect(supportedIds).toHaveLength(10);
+      expect(supportedIds).toHaveLength(10); // Only main formats, not aliases
       
       newFormats.forEach(format => {
         expect(supportedIds).toContain(format);
@@ -91,13 +91,13 @@ describe('New Diagram Formats Integration', () => {
       });
     });
 
-    test('should have updated format count to 10', () => {
+    test('should have updated format count to 12', () => {
       const enabledFormats = formatsManager.getEnabledFormats();
-      expect(enabledFormats).toHaveLength(10);
+      expect(enabledFormats).toHaveLength(12);
       
       const metadata = formatsManager.getMetadata();
-      expect(metadata.totalFormats).toBe(10);
-      expect(metadata.enabledFormats).toBe(10);
+      expect(metadata.totalFormats).toBe(12);
+      expect(metadata.enabledFormats).toBe(12);
     });
   });
 
@@ -245,7 +245,7 @@ describe('New Diagram Formats Integration', () => {
       const formats = formatsManager.getEnabledFormats();
       const end = performance.now();
 
-      expect(formats).toHaveLength(10);
+      expect(formats).toHaveLength(12);
       expect(end - start).toBeLessThan(50); // Should be fast
     });
 
@@ -264,7 +264,7 @@ describe('New Diagram Formats Integration', () => {
 
     test('should handle all format configurations without errors', () => {
       const allFormats = formatsManager.getAllFormats();
-      expect(allFormats).toHaveLength(10);
+      expect(allFormats).toHaveLength(12);
 
       allFormats.forEach(format => {
         expect(() => {

@@ -231,7 +231,7 @@ describe('Diagram Selection System', () => {
   describe('Format Catalog', () => {
     it('should provide complete format catalog', () => {
       const catalog = handler.getFormatCatalog();
-      expect(catalog).toHaveLength(10);
+      expect(catalog).toHaveLength(12);
       
       const formatNames = catalog.map(f => f.format);
       expect(formatNames).toContain('mermaid');

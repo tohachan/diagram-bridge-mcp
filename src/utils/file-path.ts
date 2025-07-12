@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
-import { fileURLToPath } from 'url';
 
 /**
  * Find the project root directory by looking for package.json
@@ -47,16 +46,6 @@ export function findProjectRoot(startDir?: string): string {
  */
 function getCurrentFileDir(): string {
   try {
-    // For ESM modules (when import.meta.url is available)
-    if (typeof import.meta !== 'undefined' && import.meta.url) {
-      const currentFile = fileURLToPath(import.meta.url);
-      return path.dirname(currentFile);
-    }
-  } catch (error) {
-    // Fall through to next method
-  }
-  
-  try {
     // For CommonJS modules (when __dirname is available)
     if (typeof __dirname !== 'undefined') {
       return __dirname;
@@ -65,7 +54,54 @@ function getCurrentFileDir(): string {
     // Fall through to next method
   }
   
+  try {
+    // Alternative method using stack trace to get current file location
+    // This works in both ESM and CommonJS without TypeScript issues
+    const err = new Error();
+    const stack = err.stack;
+    if (stack) {
+      const stackLines = stack.split('\n');
+      // Look for this file in the stack trace
+      for (const line of stackLines) {
+        if (line.includes('file-path') && (line.includes('.js') || line.includes('.ts'))) {
+          // Extract file path from stack trace line
+          // Format: "at ... (file:///path/to/file.js:line:col)" or "at ... (/path/to/file.js:line:col)"
+          const match = line.match(/\((.+?file-path[^:)]+)/);
+          if (match && match[1]) {
+            let filePath = match[1];
+            // Remove file:// protocol if present
+            if (filePath.startsWith('file://')) {
+              filePath = filePath.substring(7);
+            }
+            // On Windows, remove leading slash if it's a drive path
+            if (process.platform === 'win32' && filePath.match(/^\/[A-Za-z]:/)) {
+              filePath = filePath.substring(1);
+            }
+            return path.dirname(filePath);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // Fall through to next method
+  }
+  
+  try {
+    // Try using module resolution (for CommonJS environments)
+    if (typeof require !== 'undefined' && require.resolve) {
+      // This might work in some Node.js environments
+      const modulePath = require.resolve('./file-path');
+      if (modulePath) {
+        return path.dirname(modulePath);
+      }
+    }
+  } catch (error) {
+    // Fall through to fallback
+  }
+  
   // Fallback to current working directory
+  // This works for most cases since we also have other strategies
+  // to find the project root (from cwd, from provided startDir, etc.)
   return process.cwd();
 }
 

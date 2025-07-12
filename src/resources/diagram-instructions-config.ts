@@ -432,46 +432,53 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
     format: 'structurizr',
     displayName: 'Structurizr',
     syntaxGuidelines: [
-      'Define workspace: workspace { model { ... } views { ... } }',
-      'Define software systems: softwareSystem "Name" { ... }',
-      'Define containers: container "Name" { technology "Tech" }',
-      'Define components: component "Name" { technology "Tech" }',
-      'Define relationships: user -> system "Uses"',
-      'Define views: systemContext softwareSystem { ... }',
-      'Use consistent naming and descriptions',
-      'Add deployment environments when needed'
+      'Start with: workspace { model { ... } views { ... } }',
+      'Define persons: user = person "Name" "Description"',
+      'Define software systems: system = softwareSystem "Name" "Description" { ... }',
+      'Define containers: container = container "Name" "Description" "Technology" { ... }',
+      'Define components: component = component "Name" "Description" "Technology"',
+      'Define relationships: user -> system "relationship label"',
+      'Define views: systemContext systemName { include * autoLayout }',
+      'Container view: container systemName { include * autoLayout }',
+      'Component view: component containerName { include * autoLayout }',
+      'Use comments with # symbol'
     ],
     bestPractices: [
-      'Use hierarchical system definition',
-      'Define clear system boundaries',
-      'Include technology stack information',
-      'Create multiple views for different perspectives',
-      'Use consistent naming conventions',
-      'Add comprehensive descriptions',
-      'Define deployment environments'
+      'ALWAYS define multiple views - start with component view for detailed structure',
+      'Use C4 hierarchy: person -> softwareSystem -> container -> component',
+      'Group into 2-4 logical containers max (Frontend/Backend/Build/Config layers)',
+      'Include technology stratification in descriptions ("React/TypeScript", "Node.js/Vite")',
+      'Component views show actual code structure - use them for implementation details',
+              'Use autoLayout with direction: autoLayout lr (left-right) or tb (top-bottom)',
+      'Add meaningful titles to views: title "Container Architecture"',
+      'Define clear system boundaries and separation of concerns'
     ],
     commonPitfalls: [
-      'DO NOT forget workspace structure',
-      'DO NOT mix different abstraction levels',
-      'DO NOT omit required syntax elements',
-      'DO NOT use invalid Structurizr DSL syntax',
-      'DO NOT create overly complex single models',
-      'DO NOT ignore view definitions',
-      'DO NOT use unclear naming conventions'
+      'DO NOT use only systemContext view - results in oversimplified diagrams',
+      'DO NOT create flat structure - use proper C4 hierarchy',
+      'DO NOT define too many containers (>4) - creates visual chaos',
+      'DO NOT omit technology descriptions - unclear component purposes',
+      'DO NOT forget autoLayout in views',
+      'DO NOT mix different abstraction levels incorrectly',
+      'DO NOT create circular references in relationships',
+      'DO NOT ignore component views for detailed architectural documentation'
     ],
     examplePatterns: [
-      'workspace {\n  model {\n    user = person "User"\n    system = softwareSystem "System" {\n      container "Web App" {\n        technology "React"\n      }\n    }\n    user -> system "Uses"\n  }\n  views {\n    systemContext system {\n      include *\n    }\n  }\n}',
-      'workspace {\n  model {\n    enterprise "Company" {\n      person "Customer"\n      softwareSystem "E-commerce" {\n        container "Frontend" {\n          technology "React"\n        }\n        container "Backend" {\n          technology "Node.js"\n        }\n      }\n    }\n  }\n}',
-      'workspace {\n  model {\n    system = softwareSystem "System" {\n      api = container "API" {\n        technology "REST API"\n        component "Controller"\n        component "Service"\n      }\n    }\n  }\n  views {\n    container system {\n      include *\n    }\n  }\n}'
+      'workspace {\n  model {\n    user = person "Developer" "Application developer"\n    system = softwareSystem "Application" {\n      frontend = container "Frontend Layer" "User interface" "React/TypeScript" {\n        pages = component "Pages" "Route components"\n        components = component "Components" "Reusable UI"\n      }\n      backend = container "Backend Layer" "Business logic" "Node.js/Express"\n    }\n    user -> system "Develops"\n  }\n  views {\n    systemContext system {\n      include *\n      autoLayout\n      title "System Overview"\n    }\n    container system {\n      include *\n      autoLayout\n      title "Container Architecture"\n    }\n    component frontend {\n      include *\n      autoLayout lr\n      title "Frontend Components"\n    }\n  }\n}',
+      'workspace {\n  model {\n    customer = person "Customer" "End user"\n    ecommerce = softwareSystem "E-commerce Platform" {\n      web = container "Web Store" "Customer interface" "React/TypeScript" {\n        catalog = component "Product Catalog" "Browse products"\n        cart = component "Shopping Cart" "Manage purchases"\n      }\n      api = container "API Server" "Business logic" "Node.js/Express" {\n        orders = component "Order Service" "Process orders"\n        payments = component "Payment Service" "Handle payments"\n      }\n      data = container "Database" "Data storage" "PostgreSQL"\n    }\n    customer -> ecommerce "Shops using"\n    web -> api "Makes API calls"\n    api -> data "Stores data"\n  }\n  views {\n    systemContext ecommerce { include * autoLayout title "System Context" }\n    container ecommerce { include * autoLayout title "Containers" }\n    component web { include * autoLayout lr title "Web Components" }\n    component api { include * autoLayout td title "API Components" }\n  }\n}',
+      'workspace {\n  model {\n    developer = person "Developer"\n    system = softwareSystem "Remix Application" {\n      frontend = container "Frontend Layer" "User interface" "React/TypeScript" {\n        routes = component "Route Handlers" "Remix routes"\n        pages = component "Page Components" "React pages"\n      }\n      build = container "Build Layer" "Compilation" "Vite/Node.js" {\n        client = component "Client Bundle" "Browser code"\n        server = component "Server Bundle" "SSR code"\n      }\n      config = container "Config Layer" "Settings" "JSON/TypeScript" {\n        typescript = component "TS Config" "Compiler settings"\n        vite = component "Vite Config" "Build config"\n      }\n    }\n    developer -> system "Develops"\n    routes -> pages "Renders"\n    frontend -> build "Compiles to"\n    config -> build "Configures"\n  }\n  views {\n    systemContext system { include * autoLayout title "System Overview" }\n    container system { include * autoLayout title "Layer Architecture" }\n    component frontend { include * autoLayout lr title "Frontend Structure" }\n    component build { include * autoLayout title "Build Components" }\n  }\n}'
     ],
     outputSpecifications: [
       'Output ONLY the Structurizr DSL code without markdown wrapper',
-      'Use proper workspace structure',
-      'Define clear model hierarchy',
-      'Include technology specifications',
-      'Create appropriate views',
-      'Use consistent naming and descriptions',
-      'Follow Structurizr DSL syntax rules'
+      'Start with workspace { and end with matching }',
+      'ALWAYS include multiple views (systemContext, container, component)',
+      'Use C4 hierarchy: person -> softwareSystem -> container -> component',
+              'Include autoLayout in all view definitions with optional direction (lr/tb/bt/rl)',
+      'Add descriptive titles to views for clarity',
+      'Group components into 2-4 logical containers maximum',
+      'Include technology descriptions for all containers and components',
+      'Use component views to show detailed internal structure',
+      'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"'
     ]
   },
 

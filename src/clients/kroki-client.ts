@@ -262,8 +262,26 @@ export class KrokiHttpClient implements KrokiClient {
     
     // Distinguish between syntax errors and size/complexity errors
     if (message.includes('http 400')) {
-      // Check for size/complexity indicators
-      if (message.includes('bad request') && !message.includes('syntax') && !message.includes('parse')) {
+      // Check for explicit syntax/parsing error indicators
+      if (message.includes('parse') || 
+          message.includes('syntax') || 
+          message.includes('unable to parse') ||
+          message.includes('invalid input') ||
+          message.includes('valid rank directions') ||
+          message.includes('malformed')) {
+        return {
+          type: 'SYNTAX_ERROR' as DiagramRenderingError,
+          message: `Invalid diagram syntax: ${error.message}`,
+          retryable: false
+        };
+      }
+      
+      // Check for size/complexity indicators (only use SIZE_LIMIT_ERROR for actual size issues)
+      if (message.includes('too large') ||
+          message.includes('size limit') ||
+          message.includes('payload too large') ||
+          message.includes('request entity too large') ||
+          message.includes('413')) {
         return {
           type: 'SIZE_LIMIT_ERROR' as DiagramRenderingError,
           message: `Diagram too complex or large for API: ${error.message}`,
@@ -271,7 +289,7 @@ export class KrokiHttpClient implements KrokiClient {
         };
       }
       
-      // Otherwise assume syntax error
+      // Default HTTP 400 to syntax error (most common case)
       return {
         type: 'SYNTAX_ERROR' as DiagramRenderingError,
         message: `Invalid diagram syntax: ${error.message}`,

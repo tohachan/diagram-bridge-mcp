@@ -151,7 +151,7 @@ export class DiagramSelectionValidator {
     const maliciousPatterns = [
       /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
       /javascript:/gi,
-      /on\w+\s*=/gi,
+      /\s+on[a-z]+\s*=/gi, // HTML event handlers (with space before 'on')
       /data:text\/html/gi,
       /vbscript:/gi,
       /expression\s*\(/gi

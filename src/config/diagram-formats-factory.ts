@@ -615,69 +615,98 @@ export class DiagramFormatsFactory {
       displayName: 'Structurizr',
       description: 'Structurizr DSL for software architecture diagrams',
       krokiFormat: 'structurizr',
-      supportedOutputs: ['png', 'svg'],
+      supportedOutputs: ['svg'],
       enabled: true,
       characteristics: {
         strengths: [
-          'Domain-specific language for architecture',
-          'Multiple view types automatically generated',
-          'Consistent with C4 model methodology',
-          'Version control friendly text format',
-          'Rich styling and theming options'
+          'C4 model methodology support',
+          'Multiple abstraction levels',
+          'Architecture as code approach',
+          'Enterprise architecture capabilities',
+          'Version control friendly'
         ],
         weaknesses: [
-          'Learning curve for DSL syntax',
-          'Limited to software architecture domain',
+          'Complex syntax for beginners',
+          'Requires understanding of C4 methodology',
+          'Limited to architectural diagrams',
           'Requires Structurizr-specific knowledge'
         ],
         bestFor: [
-          'Software architecture as code',
-          'System landscape documentation',
-          'Multi-level architecture views',
-          'Architecture decision documentation',
-          'Team collaboration on architecture'
+          'Software architecture documentation',
+          'C4 model diagrams',
+          'Enterprise architecture',
+          'Architecture as code workflows',
+          'Team architecture collaboration'
         ],
         examples: [
-          'Enterprise system landscape',
-          'Microservices ecosystem',
-          'Integration architecture',
-          'Deployment views'
+          'Software system context diagrams',
+          'Container architecture diagrams',
+          'Component structure diagrams'
         ]
       },
       instructionTemplate: {
         syntaxGuidelines: [
-          'Define workspace with model and views',
-          'Create people, software systems, containers, components',
-          'Use -> for relationships',
-          'Define views for different perspectives',
-          'Include descriptions and metadata'
+          'Start with: workspace { model { ... } views { ... } }',
+          'Define persons: user = person "Name" "Description"',
+          'Define software systems: system = softwareSystem "Name" "Description" { ... }',
+          'Define containers: container = container "Name" "Description" "Technology" { ... }',
+          'Define components: component = component "Name" "Description" "Technology"',
+          'Define relationships: user -> system "relationship label" (ONCE only per unique pair)',
+          'Group all relationships in one clear section with comments to avoid duplication',
+          'Define views: systemContext systemName { include * autoLayout }',
+          'Container view: container systemName { include * autoLayout }',
+          'Component view: component containerName { include * autoLayout }',
+          'Use comments with # symbol for organization, not relationship duplication'
         ],
         bestPractices: [
-          'Start with model definition, then views',
-          'Use meaningful names and descriptions',
-          'Group related elements logically',
-          'Define consistent styling themes',
-          'Include multiple view types'
+          'ALWAYS define multiple views - start with container/component views first for detailed architecture',
+          'Define each relationship ONLY ONCE in the entire model - track connections carefully',
+          'Organize relationships logically in one section to avoid duplication',
+          'Use C4 hierarchy: person -> softwareSystem -> container -> component',
+          'Group into 2-4 logical containers max (Frontend/Backend/Build/Config layers)',
+          'Include technology stratification in descriptions ("React/TypeScript", "Node.js/Vite")',
+          'Component views show actual code structure - use them for implementation details',
+          'Use autoLayout with direction: autoLayout lr (left-right) or tb (top-bottom)',
+          'Add meaningful titles to views: title "Container Architecture"',
+          'Define clear system boundaries and separation of concerns',
+          'Review all relationships before finalizing - ensure no duplicates exist across comment groups'
         ],
         commonPitfalls: [
-          'DO NOT forget to define views',
-          'DO NOT use invalid DSL syntax',
-          'DO NOT create models without descriptions',
-          'DO NOT ignore relationship directions',
-          'DO NOT mix abstraction levels improperly'
+          'DO NOT duplicate relationships - each connection should be defined ONLY ONCE throughout the entire model',
+          'DO NOT put systemContext view first if you want detailed architecture - use container/component views first',
+          'DO NOT group relationships in comments that repeat the same connections - Kroki will reject duplicate relationships',
+          'DO NOT use only systemContext view - results in oversimplified diagrams',
+          'DO NOT create flat structure - use proper C4 hierarchy',
+          'DO NOT define too many containers (>4) - creates visual chaos',
+          'DO NOT omit technology descriptions - unclear component purposes',
+          'DO NOT forget autoLayout in views',
+          'DO NOT mix different abstraction levels incorrectly',
+          'DO NOT create circular references in relationships',
+          'DO NOT ignore component views for detailed architectural documentation',
+          'DO NOT define the same relationship multiple times even in different comment sections'
         ],
         examplePatterns: [
-          'workspace {\n  model {\n    user = person "User"\n    system = softwareSystem "System"\n    user -> system "Uses"\n  }\n  views {\n    systemContext system {\n      include *\n    }\n  }\n}'
+          'workspace {\n  model {\n    user = person "Developer" "Application developer"\n    system = softwareSystem "Application" {\n      frontend = container "Frontend Layer" "User interface" "React/TypeScript" {\n        pages = component "Pages" "Route components"\n        components = component "Components" "Reusable UI"\n      }\n      backend = container "Backend Layer" "Business logic" "Node.js/Express"\n    }\n    # Define relationships once - no duplicates\n    user -> system "Develops"\n    pages -> components "Uses"\n    frontend -> backend "Calls API"\n  }\n  views {\n    # Container view FIRST for detailed architecture\n    container system { include * autoLayout lr title "Application Architecture" }\n    component frontend { include * autoLayout tb title "Frontend Components" }\n    systemContext system { include * autoLayout title "System Context" }\n  }\n}',
+          'workspace {\n  model {\n    customer = person "Customer" "End user"\n    ecommerce = softwareSystem "E-commerce Platform" {\n      web = container "Web Store" "Customer interface" "React/TypeScript" {\n        catalog = component "Product Catalog" "Browse products"\n        cart = component "Shopping Cart" "Manage purchases"\n      }\n      api = container "API Server" "Business logic" "Node.js/Express" {\n        orders = component "Order Service" "Process orders"\n        payments = component "Payment Service" "Handle payments"\n      }\n      data = container "Database" "Data storage" "PostgreSQL"\n    }\n    customer -> ecommerce "Shops using"\n    web -> api "Makes API calls"\n    api -> data "Stores data"\n  }\n  views {\n    systemContext ecommerce { include * autoLayout title "System Context" }\n    container ecommerce { include * autoLayout title "Containers" }\n    component web { include * autoLayout lr title "Web Components" }\n    component api { include * autoLayout td title "API Components" }\n  }\n}',
+          'workspace {\n  model {\n    developer = person "Developer"\n    system = softwareSystem "Remix Application" {\n      frontend = container "Frontend Layer" "User interface" "React/TypeScript" {\n        routes = component "Route Handlers" "Remix routes"\n        pages = component "Page Components" "React pages"\n      }\n      build = container "Build Layer" "Compilation" "Vite/Node.js" {\n        client = component "Client Bundle" "Browser code"\n        server = component "Server Bundle" "SSR code"\n      }\n      config = container "Config Layer" "Settings" "JSON/TypeScript" {\n        typescript = component "TS Config" "Compiler settings"\n        vite = component "Vite Config" "Build config"\n      }\n    }\n    developer -> system "Develops"\n    routes -> pages "Renders"\n    frontend -> build "Compiles to"\n    config -> build "Configures"\n  }\n  views {\n    systemContext system { include * autoLayout title "System Overview" }\n    container system { include * autoLayout title "Layer Architecture" }\n    component frontend { include * autoLayout lr title "Frontend Structure" }\n    component build { include * autoLayout title "Build Components" }\n  }\n}'
         ],
         outputSpecifications: [
-          'Output ONLY the Structurizr DSL code',
-          'Define complete workspace with model and views',
-          'Use proper DSL syntax and structure',
-          'Include meaningful descriptions'
+          'Output ONLY the Structurizr DSL code without markdown wrapper',
+          'Start with workspace { and end with matching }',
+          'ALWAYS include multiple views - place container/component views FIRST for detailed architecture',
+          'NEVER duplicate relationships - define each connection exactly once in the model',
+          'Use C4 hierarchy: person -> softwareSystem -> container -> component',
+          'Include autoLayout in all view definitions with optional direction (lr/tb/bt/rl)',
+          'Add descriptive titles to views for clarity',
+          'Group components into 2-4 logical containers maximum',
+          'Include technology descriptions for all containers and components',
+          'Use component views to show detailed internal structure',
+          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"',
+          'Organize all relationships in one clear section to prevent duplicates across comment groups'
         ]
       },
       fileExtensions: ['.dsl', '.structurizr'],
-      exampleCode: 'workspace {\n  model {\n    user = person "User"\n    webapp = softwareSystem "Web App"\n    user -> webapp "Uses"\n  }\n  views {\n    systemContext webapp {\n      include *\n    }\n  }\n}'
+      exampleCode: 'workspace {\n  model {\n    user = person "User"\n    system = softwareSystem "Application" {\n      app = container "Web App"\n    }\n    user -> system "Uses"\n  }\n  views {\n    systemContext system {\n      include *\n      autoLayout\n    }\n  }\n}'
     };
   }
 

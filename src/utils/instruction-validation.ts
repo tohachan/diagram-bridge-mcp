@@ -80,11 +80,12 @@ export class DiagramInstructionsValidator {
     const maliciousPatterns = [
       /<script/i,
       /javascript:/i,
+      /\s+on[a-z]+\s*=/i, // HTML event handlers (with space before 'on')
       /data:text\/html/i,
       /vbscript:/i
     ];
 
-    const hasMaliciousContent = maliciousPatterns.some(pattern => pattern.test(userRequest));
+    const hasMaliciousContent = maliciousPatterns.some(pattern => pattern.test(trimmedRequest));
     if (hasMaliciousContent) {
       errors.push('user_request contains potentially malicious content');
     }

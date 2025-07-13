@@ -3,8 +3,6 @@
 [![CI](https://github.com/tohachan/diagram-bridge-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/tohachan/diagram-bridge-mcp/actions/workflows/ci.yml)
 [![Release](https://github.com/tohachan/diagram-bridge-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/tohachan/diagram-bridge-mcp/actions/workflows/release.yml)
 [![codecov](https://codecov.io/gh/tohachan/diagram-bridge-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/tohachan/diagram-bridge-mcp)
-[![npm version](https://badge.fury.io/js/diagram-bridge-mcp.svg)](https://badge.fury.io/js/diagram-bridge-mcp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 
 A comprehensive MCP server that bridges the gap between LLMs and diagram creation through three powerful, independent tools: **intelligent format selection**, **format-specific instruction generation**, and **professional diagram rendering** (using kroki server). Each tool can be used standalone or combined in sequence for complete diagram workflows - from choosing the right format to generating the final image.

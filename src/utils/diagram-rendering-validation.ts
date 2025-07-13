@@ -20,7 +20,7 @@ import {
  * Input validation utility for diagram rendering
  */
 export class DiagramRenderingValidator {
-  private readonly MAX_CODE_LENGTH = 100000;
+  private readonly MAX_CODE_LENGTH = parseInt(process.env.MAX_CODE_LENGTH || '5242880'); // 5MB for enterprise-level diagrams
   private readonly MIN_CODE_LENGTH = 1;
   private readonly SUPPORTED_OUTPUT_FORMATS: OutputFormat[] = ['png', 'svg'];
 

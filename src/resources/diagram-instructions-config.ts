@@ -490,6 +490,7 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
       'MANDATORY: Include all required fields for each element',
       'Required element fields: id, type, x, y, width, height, strokeColor, backgroundColor, fillStyle, strokeStyle, strokeWidth, roughness, opacity, seed',
       'Use element types: rectangle, ellipse, arrow, text, line, diamond',
+      'CRITICAL: Line elements MUST include "points" array field: [[x1,y1], [x2,y2], ...]',
       'fillStyle values: "solid", "hachure", "cross-hatch", "dots"',
       'strokeStyle values: "solid", "dashed", "dotted"',
       'roughness: number 0-2 (0=smooth, 2=rough)',
@@ -521,10 +522,13 @@ export const FORMAT_INSTRUCTION_TEMPLATES: Record<DiagramFormat, FormatInstructi
       'DO NOT create overly complex JSON structures',
       'DO NOT use tiny or huge elements',
       'DO NOT mix too many different colors',
-      'DO NOT ignore appState section'
+      'DO NOT ignore appState section',
+      'CRITICAL: DO NOT create line elements without "points" array - this causes rendering errors',
+      'DO NOT use line elements with only width/height - must include points field'
     ],
     examplePatterns: [
       '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "rect1",\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#15aabf",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1234567890\n    },\n    {\n      "id": "text1",\n      "type": "text",\n      "x": 150,\n      "y": 130,\n      "width": 100,\n      "height": 20,\n      "text": "Component",\n      "fontSize": 16,\n      "fontFamily": 1,\n      "strokeColor": "#000000",\n      "opacity": 100,\n      "roughness": 1,\n      "seed": 9876543210\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}',
+      '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "line1",\n      "type": "line",\n      "x": 50,\n      "y": 50,\n      "width": 100,\n      "height": 50,\n      "strokeColor": "#1e1e1e",\n      "backgroundColor": "transparent",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1111111111,\n      "points": [[0, 0], [100, 50]]\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}',
       '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "ellipse1",\n      "type": "ellipse",\n      "x": 50,\n      "y": 50,\n      "width": 120,\n      "height": 80,\n      "strokeColor": "#1e1e1e",\n      "backgroundColor": "transparent",\n      "fillStyle": "hachure",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 5555555555\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}'
     ],
     outputSpecifications: [

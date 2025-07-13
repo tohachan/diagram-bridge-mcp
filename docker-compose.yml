@@ -17,6 +17,7 @@ services:
       - KROKI_MAX_RETRIES=3
       - KROKI_CLOUD_FALLBACK=false
       - LOG_LEVEL=${LOG_LEVEL:-info}
+      - MAX_CODE_LENGTH=5242880
     depends_on:
       kroki:
         condition: service_healthy
@@ -40,6 +41,12 @@ services:
       - KROKI_MERMAID_HOST=mermaid
       - KROKI_BPMN_HOST=bpmn
       - KROKI_EXCALIDRAW_HOST=excalidraw
+      # Enterprise-level size limits
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+      - KROKI_MAX_URI_LENGTH=16384
+      - KROKI_CONVERT_TIMEOUT=120s
+      - KROKI_COMMAND_TIMEOUT=60s
     networks:
       - diagram-network
     healthcheck:
@@ -56,6 +63,10 @@ services:
     restart: unless-stopped
     expose:
       - "8002"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
     networks:
       - diagram-network
 
@@ -66,6 +77,10 @@ services:
     restart: unless-stopped
     expose:
       - "8001"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
     networks:
       - diagram-network
 
@@ -76,6 +91,10 @@ services:
     restart: unless-stopped
     expose:
       - "8003"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
     networks:
       - diagram-network
 
@@ -86,6 +105,10 @@ services:
     restart: unless-stopped
     expose:
       - "8004"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
     networks:
       - diagram-network
 

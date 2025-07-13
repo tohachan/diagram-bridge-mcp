@@ -2,11 +2,10 @@ version: '3.8'
 
 services:
   # Diagram Bridge MCP Server (Development)
-  diagram-bridge-mcp-dev:
+  diagram-bridge-mcp:
     build:
       context: .
       dockerfile: Dockerfile
-      target: builder  # Use builder stage for development
     container_name: diagram-bridge-mcp-dev
     restart: unless-stopped
     ports:
@@ -14,30 +13,106 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - KROKI_URL=${KROKI_URL:-https://kroki.io}  # Use public Kroki by default
-      - LOG_LEVEL=debug
-    volumes:
-      # Mount source code for development
-      - ./src:/app/src:ro
-      - ./package.json:/app/package.json:ro
-      - ./tsconfig.json:/app/tsconfig.json:ro
+      - KROKI_URL=http://kroki:8000
+      - KROKI_USE_LOCAL=true
+      - KROKI_TIMEOUT=30000
+      - KROKI_MAX_RETRIES=3
+      - KROKI_CLOUD_FALLBACK=false
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+      - MAX_CODE_LENGTH=5242880
     networks:
       - diagram-network-dev
+    volumes:
+      - ./generated-diagrams:/app/generated-diagrams
+      - ./src:/app/src  # Live reload for development
+    stdin_open: true
+    tty: true
+    depends_on:
+      - kroki
     command: ["npm", "run", "dev"]
 
-  # Optional: Local Kroki for development (minimal setup)
-  kroki-dev:
+  # Kroki Diagram Rendering Service
+  kroki:
     image: yuzutech/kroki:latest
     container_name: kroki-dev
     restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
-      - KROKI_SAFE_MODE=unsafe  # Allow more diagram types in dev
+      - KROKI_BLOCKDIAG_HOST=blockdiag
+      - KROKI_MERMAID_HOST=mermaid
+      - KROKI_BPMN_HOST=bpmn
+      - KROKI_EXCALIDRAW_HOST=excalidraw
+      # Enterprise-level size limits
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+      - KROKI_MAX_URI_LENGTH=16384
+      - KROKI_CONVERT_TIMEOUT=120s
+      - KROKI_COMMAND_TIMEOUT=60s
     networks:
       - diagram-network-dev
-    profiles:
-      - local-kroki  # Optional service, enable with --profile local-kroki
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Mermaid Service for Kroki
+  mermaid:
+    image: yuzutech/kroki-mermaid:latest
+    container_name: kroki-mermaid-dev
+    restart: unless-stopped
+    expose:
+      - "8002"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+    networks:
+      - diagram-network-dev
+
+  # BlockDiag Service for Kroki (supports various diagram types)
+  blockdiag:
+    image: yuzutech/kroki-blockdiag:latest
+    container_name: kroki-blockdiag-dev
+    restart: unless-stopped
+    expose:
+      - "8001"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+    networks:
+      - diagram-network-dev
+
+  # BPMN Service for Kroki
+  bpmn:
+    image: yuzutech/kroki-bpmn:latest
+    container_name: kroki-bpmn-dev
+    restart: unless-stopped
+    expose:
+      - "8003"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+    networks:
+      - diagram-network-dev
+
+  # Excalidraw Service for Kroki
+  excalidraw:
+    image: yuzutech/kroki-excalidraw:latest
+    container_name: kroki-excalidraw-dev
+    restart: unless-stopped
+    expose:
+      - "8004"
+    environment:
+      # Enterprise-level size limits for companion services
+      - KROKI_MAX_BODY_SIZE=50mb
+      - KROKI_MAX_HEADER_SIZE=32768
+    networks:
+      - diagram-network-dev
 
 networks:
   diagram-network-dev:

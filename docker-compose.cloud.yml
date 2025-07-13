@@ -5,31 +5,39 @@ version: '3.8'
 # Command: docker-compose -f docker-compose.cloud.yml up
 
 services:
-  # MCP Diagram Bridge Server (Cloud Mode)
-  diagram-bridge-mcp-cloud:
+  # Diagram Bridge MCP Server - Cloud Configuration
+  diagram-bridge-mcp:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: diagram-bridge-mcp-cloud
     restart: unless-stopped
     ports:
-      - "${PORT:-3001}:3000"  # Different port to avoid conflicts
+      - "${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - KROKI_URL=https://kroki.io
       - KROKI_USE_LOCAL=false
-      - KROKI_CLOUD_FALLBACK=false
-      - KROKI_TIMEOUT=30000
+      - KROKI_TIMEOUT=60000
       - KROKI_MAX_RETRIES=3
+      - KROKI_CLOUD_FALLBACK=true
       - LOG_LEVEL=${LOG_LEVEL:-info}
+      # Note: Cloud Kroki service has its own limits
+      # These are client-side validation limits
+      - MAX_CODE_LENGTH=5242880  # 5MB
+    networks:
+      - diagram-network-cloud
     volumes:
       - ./generated-diagrams:/app/generated-diagrams
+    stdin_open: true
+    tty: true
+    # Health check for cloud service
     healthcheck:
-      test: ["CMD", "node", "-e", "process.exit(0)"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "curl", "-f", "https://kroki.io/health"]
+      interval: 60s
+      timeout: 30s
       retries: 3
-      start_period: 10s
+      start_period: 30s
 
 # No Kroki service needed - uses external cloud service

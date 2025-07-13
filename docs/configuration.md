@@ -11,8 +11,77 @@ Complete configuration options for the Diagram Bridge MCP Server.
 | `KROKI_URL` | `http:/kroki:8000` | Kroki service URL |
 | `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
 | `DIAGRAM_STORAGE_PATH` | `{project-root}/generated-diagrams` | Directory for storing rendered diagram files |
+| `MAX_CODE_LENGTH` | `5242880` | Maximum diagram code length in bytes (5MB) |
 
 Change KROKI_URL to https://kroki.io for cloud Kroki service
+
+## Kroki Server Configuration
+
+### Size Limits and Performance
+
+The Diagram Bridge MCP Server is configured with enterprise-level size limits for handling large and complex diagrams:
+
+#### Current Enterprise Settings
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `KROKI_MAX_BODY_SIZE` | `50mb` | Maximum HTTP request body size |
+| `KROKI_MAX_HEADER_SIZE` | `32768` | Maximum HTTP header size (4x default) |
+| `KROKI_MAX_URI_LENGTH` | `16384` | Maximum URI length (4x default) |
+| `KROKI_CONVERT_TIMEOUT` | `120s` | Timeout for diagram conversion |
+| `KROKI_COMMAND_TIMEOUT` | `60s` | Timeout for external commands |
+| `MAX_CODE_LENGTH` | `5242880` | Maximum diagram code length (5MB) |
+
+#### Default Kroki Limits (for reference)
+
+| Parameter | Default | Enterprise |
+|-----------|---------|------------|
+| `KROKI_MAX_BODY_SIZE` | `1mb` | `50mb` |
+| `KROKI_MAX_HEADER_SIZE` | `8192` | `32768` |
+| `KROKI_MAX_URI_LENGTH` | `4096` | `16384` |
+| `KROKI_CONVERT_TIMEOUT` | `20s` | `120s` |
+| `KROKI_COMMAND_TIMEOUT` | `5s` | `60s` |
+
+### Customizing Kroki Limits
+
+To adjust these limits for your specific needs, modify the environment variables in your Docker Compose file:
+
+```yaml
+kroki:
+  image: yuzutech/kroki:latest
+  environment:
+    # Adjust these values based on your requirements
+    - KROKI_MAX_BODY_SIZE=100mb        # For very large diagrams
+    - KROKI_MAX_HEADER_SIZE=65536      # For complex requests
+    - KROKI_MAX_URI_LENGTH=32768       # For long URIs
+    - KROKI_CONVERT_TIMEOUT=180s       # For slow conversions
+    - KROKI_COMMAND_TIMEOUT=90s        # For slow external tools
+```
+
+### When to Increase Limits
+
+**Increase limits when you encounter:**
+- `413 Request Entity Too Large` errors
+- `SIZE_LIMIT_ERROR` in diagram rendering
+- Large PlantUML diagrams with many components
+- Complex Mermaid flowcharts
+- Excalidraw diagrams with many elements
+- Vega-Lite visualizations with large datasets
+
+### Performance Considerations
+
+Higher limits may impact:
+- **Memory usage**: Larger diagrams require more RAM
+- **Processing time**: Complex diagrams take longer to render
+- **Network bandwidth**: Larger requests consume more bandwidth
+- **Storage space**: Rendered images will be larger
+
+### Monitoring and Troubleshooting
+
+- Monitor Docker container logs for size-related errors
+- Check memory usage with `docker stats`
+- Use health checks to verify service availability
+- Test with progressively larger diagrams to find optimal limits
 
 ## Storage Configuration
 

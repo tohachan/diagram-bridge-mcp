@@ -763,6 +763,7 @@ export class DiagramFormatsFactory {
           'MANDATORY fields: type, version, source, elements, appState',
           'MANDATORY element fields: id, type, x, y, width, height, strokeColor, backgroundColor, fillStyle, strokeStyle, strokeWidth, roughness, opacity, seed',
           'Use element types: rectangle, ellipse, arrow, text, line, diamond',
+          'CRITICAL: Line elements MUST include "points" array field: [[x1,y1], [x2,y2], ...]',
           'fillStyle values: "solid", "hachure", "cross-hatch", "dots"',
           'strokeStyle values: "solid", "dashed", "dotted"',
           'roughness: 0-2 (0=smooth, 2=rough)',
@@ -788,7 +789,9 @@ export class DiagramFormatsFactory {
           'DO NOT forget unique id for each element',
           'DO NOT create overly complex drawings',
           'DO NOT ignore element positioning',
-          'DO NOT omit version and source fields'
+          'DO NOT omit version and source fields',
+          'CRITICAL: DO NOT create line elements without "points" array - this causes rendering errors',
+          'DO NOT use line elements with only width/height - must include points field'
         ],
         examplePatterns: [
           '{\n  "type": "excalidraw",\n  "version": 2,\n  "source": "https://excalidraw.com",\n  "elements": [\n    {\n      "id": "rect1",\n      "type": "rectangle",\n      "x": 100,\n      "y": 100,\n      "width": 200,\n      "height": 100,\n      "strokeColor": "#000000",\n      "backgroundColor": "#15aabf",\n      "fillStyle": "solid",\n      "strokeWidth": 2,\n      "strokeStyle": "solid",\n      "roughness": 1,\n      "opacity": 100,\n      "seed": 1234567890\n    }\n  ],\n  "appState": {\n    "viewBackgroundColor": "#ffffff"\n  }\n}'

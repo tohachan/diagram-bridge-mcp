@@ -18,7 +18,7 @@ describe('Diagram Instructions System', () => {
     it('should validate correct input', () => {
       const input = {
         user_request: 'Create a database schema for an e-commerce system',
-        diagram_format: 'erd' as DiagramFormat
+        diagram_format: 'mermaid' as DiagramFormat
       };
 
       const validation = validator.validateInput(input);
@@ -159,18 +159,17 @@ describe('Diagram Instructions System', () => {
       expect(prompt).toContain('digraph');
     });
 
-    it('should generate ERD instructions', () => {
+    it('should generate Mermaid instructions', () => {
       const variables = {
-        userRequest: 'Database schema for e-commerce',
-        diagramFormat: 'erd' as DiagramFormat
+        userRequest: 'Create a flowchart for user authentication',
+        diagramFormat: 'mermaid' as DiagramFormat
       };
 
       const prompt = templateEngine.generateInstructionPrompt(variables);
       
-      expect(prompt).toContain('ERD Diagram Code Generation Instructions');
-      expect(prompt).toContain('Database schema for e-commerce');
-      expect(prompt).toContain('primary key');
-      expect(prompt).toContain('foreign key');
+      expect(prompt).toContain('Mermaid Diagram Code Generation Instructions');
+      expect(prompt).toContain('Create a flowchart for user authentication');
+      expect(prompt).toContain('flowchart');
     });
 
     it('should detect complexity levels', () => {
@@ -259,14 +258,14 @@ describe('Diagram Instructions System', () => {
 
     it('should detect database domain context', async () => {
       const input = {
-        user_request: 'Create a database schema with tables and relationships',
-        diagram_format: 'erd' as DiagramFormat
+        user_request: 'Create a database schema with tables and relationships using Mermaid ER diagram',
+        diagram_format: 'mermaid' as DiagramFormat
       };
 
       const result = await handler.processRequest(input);
       
       expect(result.prompt_text).toContain('Domain-Specific Guidance');
-      expect(result.prompt_text).toContain('primary keys');
+      expect(result.prompt_text).toContain('entity');
     });
 
     it('should detect API domain context', async () => {
@@ -281,7 +280,7 @@ describe('Diagram Instructions System', () => {
     });
 
     it('should handle all supported formats', async () => {
-      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite'];
+      const formats: DiagramFormat[] = ['mermaid', 'plantuml', 'd2', 'graphviz', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite'];
       
       for (const format of formats) {
         const input = {
@@ -323,15 +322,15 @@ describe('Diagram Instructions System', () => {
     it('should provide metrics', async () => {
       const metrics = await handler.getMetrics();
       
-      expect(metrics.supportedFormats).toBe(12);
+      expect(metrics.supportedFormats).toBe(11);
       expect(metrics.validationRules).toBe(4);
-      expect(Object.keys(metrics.templateSize)).toHaveLength(12);
+      expect(Object.keys(metrics.templateSize)).toHaveLength(11);
     });
 
     it('should get all supported formats', () => {
       const formats = handler.getAllSupportedFormats();
       
-      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite']);
+      expect(formats).toEqual(['mermaid', 'plantuml', 'd2', 'graphviz', 'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite']);
     });
 
     it('should get format template information', () => {
@@ -349,18 +348,6 @@ describe('Diagram Instructions System', () => {
   });
 
   describe('Context Enhancement', () => {
-    it('should provide additional guidance for e-commerce ERD', async () => {
-      const input = {
-        user_request: 'Create an e-commerce database schema with users, products, and orders',
-        diagram_format: 'erd' as DiagramFormat
-      };
-
-      const result = await handler.processRequest(input);
-      
-      expect(result.prompt_text).toContain('e-commerce entities');
-      expect(result.prompt_text).toContain('User, Product, Order');
-    });
-
     it('should provide sequence-specific guidance for Mermaid', async () => {
       const input = {
         user_request: 'Show sequence of interactions between user and system',

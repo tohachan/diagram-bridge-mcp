@@ -33,9 +33,9 @@ describe('New Diagram Formats Integration', () => {
       }
     });
 
-    test('should have updated default registry with all 12 formats', () => {
+    test('should have updated default registry with all 11 formats', () => {
       const registry = DiagramFormatsFactory.createDefaultRegistry();
-      expect(Object.keys(registry.formats)).toHaveLength(12);
+      expect(Object.keys(registry.formats)).toHaveLength(11);
       expect(registry.version).toBe('2.0.0');
       
       // Check original formats still exist
@@ -43,7 +43,6 @@ describe('New Diagram Formats Integration', () => {
       expect(registry.formats.plantuml).toBeDefined();
       expect(registry.formats.d2).toBeDefined();
       expect(registry.formats.graphviz).toBeDefined();
-      expect(registry.formats.erd).toBeDefined();
       
       // Check new formats exist
       expect(registry.formats.bpmn).toBeDefined();
@@ -55,7 +54,7 @@ describe('New Diagram Formats Integration', () => {
 
     test('should have updated getSupportedFormatIds to include new formats', () => {
       const supportedIds = DiagramFormatsFactory.getSupportedFormatIds();
-      expect(supportedIds).toHaveLength(12); // Includes main formats and aliases
+      expect(supportedIds).toHaveLength(11); // Includes main formats and aliases
       
       newFormats.forEach(format => {
         expect(supportedIds).toContain(format);
@@ -91,13 +90,13 @@ describe('New Diagram Formats Integration', () => {
       });
     });
 
-    test('should have updated format count to 12', () => {
+    test('should have updated format count to 11', () => {
       const enabledFormats = formatsManager.getEnabledFormats();
-      expect(enabledFormats).toHaveLength(12);
+      expect(enabledFormats).toHaveLength(11);
       
       const metadata = formatsManager.getMetadata();
-      expect(metadata.totalFormats).toBe(12);
-      expect(metadata.enabledFormats).toBe(12);
+      expect(metadata.totalFormats).toBe(11);
+      expect(metadata.enabledFormats).toBe(11);
     });
   });
 
@@ -245,7 +244,7 @@ describe('New Diagram Formats Integration', () => {
       const formats = formatsManager.getEnabledFormats();
       const end = performance.now();
 
-      expect(formats).toHaveLength(12);
+      expect(formats).toHaveLength(11);
       expect(end - start).toBeLessThan(50); // Should be fast
     });
 
@@ -264,7 +263,7 @@ describe('New Diagram Formats Integration', () => {
 
     test('should handle all format configurations without errors', () => {
       const allFormats = formatsManager.getAllFormats();
-      expect(allFormats).toHaveLength(12);
+      expect(allFormats).toHaveLength(11);
 
       allFormats.forEach(format => {
         expect(() => {
@@ -281,8 +280,8 @@ describe('New Diagram Formats Integration', () => {
   });
 
   describe('Backward Compatibility', () => {
-    test('should maintain support for original 5 formats', () => {
-      const originalFormats = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd'];
+    test('should maintain support for original 4 formats', () => {
+      const originalFormats = ['mermaid', 'plantuml', 'd2', 'graphviz'];
       
       originalFormats.forEach(format => {
         expect(formatsManager.isFormatSupported(format)).toBe(true);
@@ -292,7 +291,6 @@ describe('New Diagram Formats Integration', () => {
 
     test('should maintain correct format selection for original formats', () => {
       const testCases = [
-        { request: 'database schema', expectedFormat: 'erd' },
         { request: 'sequence diagram', expectedFormat: 'mermaid' },
         { request: 'class diagram', expectedFormat: 'plantuml' },
         { request: 'dependency graph', expectedFormat: 'graphviz' },

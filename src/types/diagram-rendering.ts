@@ -109,55 +109,6 @@ export interface KrokiClient {
 }
 
 /**
- * Cache entry for rendered diagrams
- */
-export interface CacheEntry {
-  /**
-   * Cached rendering output
-   */
-  data: DiagramRenderingOutput;
-  
-  /**
-   * Timestamp when entry was created
-   */
-  timestamp: number;
-  
-  /**
-   * Size of the cached data in bytes (file size)
-   */
-  size: number;
-}
-
-/**
- * Cache interface for diagram rendering
- */
-export interface DiagramCache {
-  /**
-   * Get cached rendering result
-   */
-  get(key: string): CacheEntry | undefined;
-  
-  /**
-   * Store rendering result in cache
-   */
-  set(key: string, value: CacheEntry): void;
-  
-  /**
-   * Clear all cached entries
-   */
-  clear(): void;
-  
-  /**
-   * Get cache statistics
-   */
-  stats(): {
-    size: number;
-    hitRate: number;
-    memoryUsage: number;
-  };
-}
-
-/**
  * Format mapping configuration for Kroki
  */
 export interface FormatMapping {
@@ -188,7 +139,6 @@ export type DiagramRenderingError =
   | 'KROKI_UNAVAILABLE'
   | 'NETWORK_ERROR'
   | 'TIMEOUT_ERROR'
-  | 'CACHE_ERROR'
   | 'UNKNOWN_ERROR';
 
 /**

@@ -143,14 +143,5 @@ export const DIAGRAM_RENDERING_RESOURCE_CONFIG = {
       nodeVersion: '>=18.0.0',
       description: 'Compatible with MCP specification 1.0+ and Node.js 18+'
     }
-  },
-  
-  // Cache configuration
-  caching: {
-    enabled: true,
-    strategy: 'lru',
-    maxSize: 100,
-    ttl: 3600000, // 1 hour
-    description: 'LRU cache for identical diagram rendering requests'
   }
 } as const; 

@@ -120,7 +120,7 @@ The Diagram Bridge MCP Server follows a clean, modular architecture:
 - **Pipeline Architecture** - Sequential processing of diagram workflow
 - **Resource Pattern** - MCP resource management for health and metrics
 - **Template Engine** - Dynamic prompt generation for LLMs
-- **Caching Layer** - LRU cache for performance optimization
+- **Error Handling** - Comprehensive error classification and safe handling
 
 ## Contributing Guidelines
 
@@ -202,7 +202,6 @@ docker-compose restart
 
 ### Local Metrics
 - Response time tracking for all operations
-- Cache hit/miss ratios
 - Error rates and classifications
 - Memory usage monitoring
 

@@ -8,12 +8,15 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "@types/node": "^22.0.0",
-    "ts-node": "^10.9.0",
-    "jest": "^29.7.0",
     "@types/jest": "^29.5.0",
-    "ts-jest": "^29.2.0"
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.8.3"
   },
   "keywords": [
     "mcp",
@@ -37,6 +40,9 @@
     "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "rm -rf dist"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "clean": "rm -rf dist coverage"
   }
 }

@@ -302,7 +302,7 @@ Shared Storage → Monitoring Stack
 ### Resource Requirements
 - **Memory**: 256MB - 1GB depending on load
 - **CPU**: 0.5-2 cores for optimal performance
-- **Storage**: 10GB+ for diagram cache
+- **Storage**: 1GB+ for generated diagrams
 - **Network**: 100Mbps+ for Kroki communication
 
 ---

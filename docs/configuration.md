@@ -187,17 +187,16 @@ export const DIAGRAM_FORMATS = {
 ## Security Configuration
 
 - **Input validation**: Automatic parameter validation and sanitization
-- **Content filtering**: Malicious content detection enabled by default
+- **Content filtering**: Malicious content detection enabled for user requests
 - **Parameter limits**: Maximum code length: 100,000 characters
 - **Format validation**: Strict format whitelist validation
 - **Error sanitization**: Safe error message handling
 
 ## Performance Tuning
 
-### Caching Configuration
-- **LRU cache**: Enabled for diagram rendering (identical requests)
-- **Template cache**: Format definitions and templates cached in memory
+### Response Optimization
 - **Response optimization**: Base64 encoding/decoding optimization
+- **Pipeline efficiency**: Streamlined processing workflows
 
 ### Resource Limits
 - **Memory**: Optimized for container deployment

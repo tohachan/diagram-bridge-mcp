@@ -244,39 +244,6 @@ ${issueText}
       }
     }, 60000);
 
-    test('ERD rendering (PNG, SVG)', async () => {
-      const format = 'erd';
-      const config = formatsManager.getFormatConfig(format);
-      expect(config).toBeDefined();
-      
-      const testCode = config!.exampleCode;
-      const issues: string[] = [];
-      
-      try {
-        // Test PNG rendering
-        const pngPath = getDiagramFilePath(`test-${format}.png`);
-        await krokiClient.renderDiagram(testCode, format as any, 'png', pngPath);
-        
-        const pngStats = await fs.stat(pngPath);
-        expect(pngStats.size).toBeGreaterThan(100);
-        
-        // Test SVG rendering
-        const svgPath = getDiagramFilePath(`test-${format}.svg`);
-        await krokiClient.renderDiagram(testCode, format as any, 'svg', svgPath);
-        
-        const svgStats = await fs.stat(svgPath);
-        expect(svgStats.size).toBeGreaterThan(100);
-        
-        await updateTestStatus(format, ['png', 'svg'], 'PASSED');
-        
-      } catch (error) {
-        issues.push(`Rendering failed: ${getErrorMessage(error)}`);
-        await recordIssue('Major Issues', format, 'png/svg', error);
-        await updateTestStatus(format, ['png', 'svg'], 'FAILED', issues.join('; '));
-        throw error;
-      }
-    }, 60000);
-
     test('BPMN rendering (SVG only)', async () => {
       const format = 'bpmn';
       const config = formatsManager.getFormatConfig(format);
@@ -286,26 +253,22 @@ ${issueText}
       const issues: string[] = [];
       
       try {
-        // Test SVG rendering only (BPMN doesn't support PNG)
+        // BPMN only supports SVG output format
         const svgPath = getDiagramFilePath(`test-${format}.svg`);
         await krokiClient.renderDiagram(testCode, format as any, 'svg', svgPath);
         
         const svgStats = await fs.stat(svgPath);
         expect(svgStats.size).toBeGreaterThan(100);
         
-        // Verify PNG is not supported
-        try {
-          const pngPath = getDiagramFilePath(`test-${format}-invalid.png`);
-          await krokiClient.renderDiagram(testCode, format as any, 'png', pngPath);
-          issues.push('PNG rendering unexpectedly succeeded for BPMN');
-        } catch (pngError) {
-          // Expected to fail - this is correct behavior
-        }
+        // Verify it's valid SVG content
+        const svgContent = await fs.readFile(svgPath, 'utf-8');
+        expect(svgContent).toContain('<svg');
+        expect(svgContent).toContain('</svg>');
         
         await updateTestStatus(format, ['svg'], 'PASSED');
         
       } catch (error) {
-        issues.push(`SVG rendering failed: ${getErrorMessage(error)}`);
+        issues.push(`Rendering failed: ${getErrorMessage(error)}`);
         await recordIssue('Major Issues', format, 'svg', error);
         await updateTestStatus(format, ['svg'], 'FAILED', issues.join('; '));
         throw error;

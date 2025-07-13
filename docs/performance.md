@@ -8,13 +8,11 @@ Performance characteristics and security features of the Diagram Bridge MCP Serv
 
 - **Response time target**: <100ms for format analysis
 - **Memory efficient**: Optimized algorithms for format selection
-- **Template caching**: Format definitions and templates cached in memory
 - **Pipeline optimization**: Streamlined template rendering process
 
 ### Diagram Rendering  
 
 - **Response time target**: <2 seconds for diagram rendering
-- **LRU caching**: Intelligent caching for identical diagram requests
 - **Encoding optimization**: Efficient Base64 encoding/decoding
 - **Retry logic**: Exponential backoff for transient failures
 - **Memory optimization**: Designed for container deployment scenarios
@@ -26,26 +24,13 @@ Performance characteristics and security features of the Diagram Bridge MCP Serv
 - **Resource optimization**: Efficient resource usage patterns
 - **Concurrent processing**: Async request handling for multiple simultaneous requests
 
-### Caching Strategy
-
-**Format Selection Caching:**
-- Format definitions cached in memory at startup
-- Template configurations loaded once and reused
-- Heuristic patterns pre-compiled for fast analysis
-
-**Diagram Rendering Caching:**
-- LRU cache for identical diagram code + format combinations
-- Cache hit rates typically >60% in production workloads
-- Automatic cache cleanup to prevent memory bloat
-- Cache bypass for debugging and development modes
-
 ### Performance Metrics
 
 Key metrics available via MCP resources:
 
-- **Selection metrics**: Average response time, request count, cache statistics
-- **Instructions metrics**: Template generation time, cache hit rates
-- **Rendering metrics**: Kroki response times, cache performance, error rates
+- **Selection metrics**: Average response time, request count
+- **Instructions metrics**: Template generation time
+- **Rendering metrics**: Kroki response times, error rates
 - **System metrics**: Memory usage, concurrent request handling
 
 ## Security
@@ -59,8 +44,8 @@ Key metrics available via MCP resources:
 
 ### Malicious Content Detection
 
-- **Code analysis**: Static analysis of diagram code for suspicious patterns
-- **Format validation**: Ensure code matches expected format syntax
+- **User request analysis**: Static analysis of user requests for suspicious patterns (script injection, HTML events)
+- **Format validation**: Ensure diagram code matches expected format syntax
 - **Resource limits**: Prevent resource exhaustion attacks
 - **Safe error handling**: No system information leakage in error messages
 
@@ -128,8 +113,7 @@ Key metrics available via MCP resources:
   },
   "details": {
     "uptime": "24h 15m 30s",
-    "requests_processed": 1543,
-    "cache_hit_rate": 0.67
+    "requests_processed": 1543
   }
 }
 ```
@@ -140,7 +124,6 @@ Key metrics available via MCP resources:
 - Average response time per operation type
 - Request throughput (requests per second)
 - Error rates by error type
-- Cache hit/miss ratios
 - Memory and CPU usage
 
 **Metrics Collection:**
@@ -165,7 +148,6 @@ Key metrics available via MCP resources:
 
 **Performance Logging:**
 - Slow request identification
-- Cache performance statistics
 - Resource usage patterns
 - External service response times
 
@@ -194,7 +176,6 @@ Key metrics available via MCP resources:
 - **Network**: Dependent on Kroki service latency and diagram complexity
 
 **Scaling Recommendations:**
-- Monitor cache hit rates to optimize memory allocation
 - Scale based on Kroki service capacity and response times
 - Implement request queuing for high-traffic scenarios
 - Consider CDN for static diagram file serving

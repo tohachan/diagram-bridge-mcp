@@ -98,7 +98,7 @@ curl http://localhost:8000/health
 1. **Port conflicts**: Change ports in docker-compose.yml or use environment variables
 2. **Kroki service unavailable**: Check `docker-compose logs kroki`
 3. **Memory issues**: Adjust container limits in docker-compose.yml
-4. **Slow rendering**: Check cache settings and Kroki service health
+4. **Slow rendering**: Check Kroki service health and network connectivity
 
 ### Debug Commands
 ```bash

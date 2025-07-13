@@ -4,12 +4,9 @@ import {
   DiagramRenderingErrorInfo,
   KrokiClient
 } from '../types/diagram-rendering.js';
-import { DiagramFormat } from '../types/diagram-selection.js';
-import { OutputFormat } from '../types/diagram-rendering.js';
 import { DiagramRenderingValidator } from '../utils/diagram-rendering-validation.js';
 import { KrokiHttpClient } from '../clients/kroki-client.js';
-import { DiagramLRUCache } from '../utils/diagram-cache.js';
-import { isFormatOutputSupported, getDefaultOutputFormat, getContentType } from '../resources/diagram-rendering-format-mapping.js';
+import { getDefaultOutputFormat } from '../resources/diagram-rendering-format-mapping.js';
 import { getDiagramFilePath, ensureDiagramStorageDirectory } from '../utils/file-path.js';
 import { getSupportedDiagramFormats } from '../utils/format-validation.js';
 import { getKrokiConfig } from '../config/kroki.js';
@@ -20,25 +17,12 @@ import { getKrokiConfig } from '../config/kroki.js';
 export class KrokiRenderingHandler {
   private validator: DiagramRenderingValidator;
   private krokiClient: KrokiClient;
-  private cache: DiagramLRUCache;
-  private cacheEnabled: boolean;
-  private cacheMaxAge: number;
 
   constructor(options?: {
     krokiClient?: KrokiClient;
-    cacheEnabled?: boolean;
-    cacheMaxSize?: number;
-    cacheMaxMemoryMB?: number;
-    cacheMaxAge?: number;
   }) {
     this.validator = new DiagramRenderingValidator();
     this.krokiClient = options?.krokiClient || new KrokiHttpClient();
-    this.cacheEnabled = false; // DISABLED: Always create new files, no caching
-    this.cacheMaxAge = options?.cacheMaxAge ?? 3600000; // Keep for backwards compatibility
-    this.cache = new DiagramLRUCache(
-      options?.cacheMaxSize ?? 100,
-      options?.cacheMaxMemoryMB ?? 50
-    );
 
     // Log Kroki configuration on startup
     const krokiConfig = getKrokiConfig();
@@ -156,14 +140,6 @@ export class KrokiRenderingHandler {
       const krokiHealth = await this.krokiClient.healthCheck();
       if (krokiHealth.status === 'unhealthy') {
         issues.push(`Kroki client unhealthy: ${krokiHealth.details.join(', ')}`);
-      }
-
-      // Test cache functionality
-      if (this.cacheEnabled) {
-        const cacheStats = this.cache.stats();
-        if (isNaN(cacheStats.hitRate) || cacheStats.memoryUsage < 0) {
-          issues.push('Cache statistics are invalid');
-        }
       }
 
       // Test all supported formats with simple test cases
@@ -302,7 +278,6 @@ export class KrokiRenderingHandler {
    */
   async getMetrics(): Promise<{
     processingTime?: number;
-    cacheStats: ReturnType<DiagramLRUCache['stats']>;
     supportedFormats: number;
     krokiConnection?: {
       connected: boolean;
@@ -324,9 +299,6 @@ export class KrokiRenderingHandler {
       // Ignore errors for metrics
     }
 
-    // Get cache statistics
-    const cacheStats = this.cache.stats();
-
     // Test Kroki connection
     let krokiConnection: { connected: boolean; responseTime: number } | undefined;
     try {
@@ -343,11 +315,9 @@ export class KrokiRenderingHandler {
 
     const metrics: {
       processingTime?: number;
-      cacheStats: ReturnType<DiagramLRUCache['stats']>;
       supportedFormats: number;
       krokiConnection?: { connected: boolean; responseTime: number };
     } = {
-      cacheStats,
       supportedFormats: getSupportedDiagramFormats().length
     };
 
@@ -362,41 +332,7 @@ export class KrokiRenderingHandler {
     return metrics;
   }
 
-  /**
-   * Clear the cache
-   */
-  clearCache(): void {
-    this.cache.clear();
-  }
 
-  /**
-   * Update cache configuration
-   */
-  updateCacheConfig(options: {
-    enabled?: boolean;
-    maxAge?: number;
-  }): void {
-    if (options.enabled !== undefined) {
-      this.cacheEnabled = options.enabled;
-    }
-    if (options.maxAge !== undefined) {
-      this.cacheMaxAge = options.maxAge;
-    }
-  }
-
-  /**
-   * Get cache debug information
-   */
-  getCacheDebugInfo(): ReturnType<DiagramLRUCache['getDebugInfo']> {
-    return this.cache.getDebugInfo();
-  }
-
-  /**
-   * Prune expired cache entries
-   */
-  pruneCache(): number {
-    return this.cache.pruneExpired(this.cacheMaxAge);
-  }
 
   /**
    * Check if error is a DiagramRenderingErrorInfo

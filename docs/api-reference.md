@@ -138,12 +138,12 @@ Render diagram source code into images via Kroki service.
 #### diagram_instructions_metrics
 - **URI**: `metrics://diagram_instructions`
 - **Description**: Performance metrics for instruction generation
-- **Response**: Template generation performance and cache statistics
+- **Response**: Template generation performance and usage statistics
 
 #### diagram_rendering_metrics
 - **URI**: `metrics://diagram_rendering`
 - **Description**: Performance metrics for diagram rendering
-- **Response**: Cache stats, Kroki connectivity, rendering performance
+- **Response**: Kroki connectivity, rendering performance, error rates
 
 ### Catalog Resources
 
@@ -279,6 +279,6 @@ Based on keyword analysis:
 ## Security Considerations
 
 - **Input sanitization**: All inputs are validated and sanitized
-- **Content filtering**: Malicious content detection enabled
+- **Content filtering**: Malicious content detection enabled for user requests
 - **File safety**: Generated files are safely stored with controlled access
 - **Error handling**: Safe error messages without system information leakage

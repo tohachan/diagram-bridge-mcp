@@ -294,7 +294,7 @@ npm start | ts '[%Y-%m-%d %H:%M:%S]'
 
 **Solutions**:
 - Check Kroki service health and response times
-- Monitor cache hit rates via metrics endpoints
+- Monitor response times via metrics endpoints
 - Optimize diagram complexity
 - Consider local Kroki deployment for better performance
 

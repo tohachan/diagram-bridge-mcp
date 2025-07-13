@@ -29,10 +29,10 @@ docker-compose up --build
 ```json
 {
   "mcpServers": {
-    "diagram-bridge": {
-      "command": "npm",
-      "args": ["start"],
-      "cwd": "/path/to/diagram-bridge-mcp"
+    "diagram-bridge-mcp": {
+      "command": "node",
+      "args": ["/path/to/diagram-bridge-mcp/dist/index.js"],
+      "enabled": true
     }
   }
 }

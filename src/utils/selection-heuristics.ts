@@ -96,7 +96,8 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     reasoning: 'GraphViz provides precise layout control for organizational hierarchies'
   },
   
-  // ERD heuristics
+  // ERD heuristics - DISABLED: ERD format temporarily disabled
+  /*
   {
     keywords: ['database', 'schema', 'table', 'entity', 'relationship', 'erd'],
     format: 'erd',
@@ -115,6 +116,7 @@ export const FORMAT_SELECTION_HEURISTICS: FormatSelectionHeuristic[] = [
     confidence: 0.7,
     reasoning: 'These domains often require database schema design best served by ERD'
   },
+  */
   
   // BPMN heuristics
   {
@@ -295,7 +297,7 @@ export class FormatSelectionAnalyzer {
     if (lowercaseRequest.includes('plantuml') || lowercaseRequest.includes('plant uml')) return 'plantuml';
     if (lowercaseRequest.includes('d2')) return 'd2';
     if (lowercaseRequest.includes('graphviz') || lowercaseRequest.includes('dot')) return 'graphviz';
-    if (lowercaseRequest.includes('erd') || lowercaseRequest.includes('entity relationship')) return 'erd';
+    // if (lowercaseRequest.includes('erd') || lowercaseRequest.includes('entity relationship')) return 'erd'; // ERD disabled
     if (lowercaseRequest.includes('bpmn')) return 'bpmn';
     if (lowercaseRequest.includes('c4') || lowercaseRequest.includes('c4-plantuml')) return 'c4-plantuml';
     if (lowercaseRequest.includes('structurizr')) return 'structurizr';

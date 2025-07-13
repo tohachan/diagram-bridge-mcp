@@ -1,0 +1,1 @@
+Choose the best diagram format for sketching a low-fidelity wireframe of a user dashboard page with sidebar navigation, a top bar containing search and profile icons, and a main metrics overview section, then generate the diagram code and render it to an image file. Save the result as user_dashboard_wireframe

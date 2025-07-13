@@ -1,0 +1,1 @@
+Choose the best diagram format for documenting the order approval process with tasks, gateways, and swimlanes between Sales, Manager, and Finance, then generate the diagram code and render it to an image file. Save the result as order_approval_bpmn

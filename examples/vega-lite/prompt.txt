@@ -1,0 +1,1 @@
+Choose the best diagram format for visualizing monthly sales metrics as a combination of bar and line charts with interactive tooltips, then generate the diagram code and render it to an image file. Save the result as sales_metrics_chart

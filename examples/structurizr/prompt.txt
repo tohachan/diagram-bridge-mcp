@@ -1,0 +1,1 @@
+Choose the best diagram format for creating a system landscape diagram using architecture as code, then generate the diagram code and render it to an image file. Save the result as system_landscape_structurizr.png.

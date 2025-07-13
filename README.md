@@ -2,7 +2,7 @@
 
 A comprehensive MCP server that bridges the gap between LLMs and diagram creation through three powerful, independent tools: **intelligent format selection**, **format-specific instruction generation**, and **professional diagram rendering** (using kroki server). Each tool can be used standalone or combined in sequence for complete diagram workflows - from choosing the right format to generating the final image.
 
-**Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, ERD, BPMN, Structurizr, Excalidraw, Vega-Lite
+**Supported Formats**: Mermaid, PlantUML, C4 Model, D2, GraphViz, BPMN, Structurizr, Excalidraw, Vega-Lite
 
 ![Demo](docs/diagram-briedge-mcp.gif)
 
@@ -53,6 +53,10 @@ This single prompt will:
 2. **Get specific instructions** for creating the diagram in that format
 3. **Create and render** the final diagram to a PNG/SVG file
 
+## 🎨 Examples Gallery
+
+Want to see what's possible? Check out **[Examples Gallery](docs/examples.md)**
+
 ## 🛠️ Tools Overview
 
 ### `help_choose_diagram`
@@ -63,7 +67,7 @@ This single prompt will:
 - Works with format constraints when needed
 - Generates structured prompts for optimal LLM decision-making
 
-**Example**: "I need to show database relationships" → Recommends ERD format with detailed reasoning
+**Example**: "I need to show database relationships" → Recommends Mermaid ER diagram format with detailed reasoning
 
 ### `get_diagram_instructions`  
 **Purpose**: Generate format-specific coding instructions

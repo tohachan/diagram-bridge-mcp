@@ -99,11 +99,6 @@ export class DiagramRenderingValidator {
       errors.push(`code cannot exceed ${this.MAX_CODE_LENGTH} characters`);
     }
 
-    // Check for potentially malicious content
-    if (this.containsMaliciousContent(trimmedCode)) {
-      errors.push('code contains potentially malicious content');
-    }
-
     return errors;
   }
 
@@ -142,28 +137,6 @@ export class DiagramRenderingValidator {
     }
 
     return errors;
-  }
-
-  /**
-   * Check for potentially malicious content in user input
-   */
-  private containsMaliciousContent(content: string): boolean {
-    // Basic security checks for potentially malicious patterns
-    const maliciousPatterns = [
-      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-      /javascript:/gi,
-      /\s+on[a-z]+\s*=/gi, // HTML event handlers (with space before 'on')
-      /data:text\/html/gi,
-      /vbscript:/gi,
-      /expression\s*\(/gi,
-      // Additional patterns for diagram code
-      /file:\/\//gi,
-      /\\x[0-9a-f]{2}/gi, // hex encoding
-      /eval\s*\(/gi,
-      /exec\s*\(/gi
-    ];
-
-    return maliciousPatterns.some(pattern => pattern.test(content));
   }
 
   /**

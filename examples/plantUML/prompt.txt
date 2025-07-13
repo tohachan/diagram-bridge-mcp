@@ -1,0 +1,1 @@
+Choose the best diagram format for illustrating the class relationships in a blogging system, including User, Post, and Comment classes with inheritance and associations, then generate the diagram code and render it to an image file. Save the result as blog_class_diagram

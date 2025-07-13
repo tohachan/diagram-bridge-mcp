@@ -9,7 +9,7 @@ import { OutputFormat } from '../types/diagram-rendering.js';
 import { DiagramRenderingValidator } from '../utils/diagram-rendering-validation.js';
 import { KrokiHttpClient } from '../clients/kroki-client.js';
 import { DiagramLRUCache } from '../utils/diagram-cache.js';
-import { isFormatOutputSupported, getDefaultOutputFormat } from '../resources/diagram-rendering-format-mapping.js';
+import { isFormatOutputSupported, getDefaultOutputFormat, getContentType } from '../resources/diagram-rendering-format-mapping.js';
 import { getDiagramFilePath, ensureDiagramStorageDirectory } from '../utils/file-path.js';
 import { getSupportedDiagramFormats } from '../utils/format-validation.js';
 import { getKrokiConfig } from '../config/kroki.js';
@@ -33,8 +33,8 @@ export class KrokiRenderingHandler {
   }) {
     this.validator = new DiagramRenderingValidator();
     this.krokiClient = options?.krokiClient || new KrokiHttpClient();
-    this.cacheEnabled = options?.cacheEnabled ?? true;
-    this.cacheMaxAge = options?.cacheMaxAge ?? 3600000; // 1 hour default
+    this.cacheEnabled = false; // DISABLED: Always create new files, no caching
+    this.cacheMaxAge = options?.cacheMaxAge ?? 3600000; // Keep for backwards compatibility
     this.cache = new DiagramLRUCache(
       options?.cacheMaxSize ?? 100,
       options?.cacheMaxMemoryMB ?? 50
@@ -78,30 +78,16 @@ export class KrokiRenderingHandler {
         throw this.createProcessingError(errorInfo);
       }
 
-      // Check cache if enabled
-      if (this.cacheEnabled) {
-        const cacheKey = DiagramLRUCache.generateKey(
-          input.code, 
-          input.diagram_format, 
-          input.output_format || defaultOutputFormat
-        );
-        
-        const cachedEntry = this.cache.get(cacheKey);
-        if (cachedEntry && DiagramLRUCache.isEntryValid(cachedEntry, this.cacheMaxAge)) {
-          return cachedEntry.data;
-        }
-      }
-
-      // Generate unique output file path (absolute)
+      // Generate unique output file path (absolute) - ALWAYS create new files
       const timestamp = Date.now();
       const formatExt = (input.output_format || defaultOutputFormat) === 'png' ? 'png' : 'svg';
       const fileName = `diagram-${input.diagram_format}-${timestamp}.${formatExt}`;
       const outputPath = getDiagramFilePath(fileName);
-      
+
       // Ensure storage directory exists
       await ensureDiagramStorageDirectory();
       
-      // Render diagram via Kroki
+      // Always render diagram via Kroki - no caching
       const output = await this.krokiClient.renderDiagram(
         input.code, 
         input.diagram_format, 
@@ -120,17 +106,7 @@ export class KrokiRenderingHandler {
         throw this.createProcessingError(errorInfo);
       }
 
-      // Store in cache if enabled
-      if (this.cacheEnabled) {
-        const cacheKey = DiagramLRUCache.generateKey(
-          input.code, 
-          input.diagram_format, 
-          input.output_format || defaultOutputFormat
-        );
-        const cacheEntry = DiagramLRUCache.createCacheEntry(output);
-        this.cache.set(cacheKey, cacheEntry);
-      }
-
+      // No caching - always create fresh files
       return output;
 
     } catch (error) {
@@ -212,15 +188,15 @@ export class KrokiRenderingHandler {
       }
 
       // Verify all formats are supported
-      const expectedFormats = ['mermaid', 'plantuml', 'd2', 'graphviz', 'erd', 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'];
+      const expectedFormats = ['mermaid', 'plantuml', 'd2', 'graphviz', /* 'erd', */ 'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite']; // ERD temporarily disabled
       for (const expectedFormat of expectedFormats) {
         if (!supportedFormats.includes(expectedFormat)) {
           issues.push(`Expected format ${expectedFormat} not supported`);
         }
       }
 
-      if (supportedFormats.length !== 10) {
-        console.warn(`[HealthCheck] Expected 10 supported formats, got ${supportedFormats.length}: ${supportedFormats.join(', ')}`);
+      if (supportedFormats.length !== 9) { // Reduced from 10 due to ERD being disabled
+        console.warn(`[HealthCheck] Expected 9 supported formats, got ${supportedFormats.length}: ${supportedFormats.join(', ')}`);
       }
 
     } catch (error) {
@@ -229,7 +205,7 @@ export class KrokiRenderingHandler {
 
     return {
       status: issues.length === 0 ? 'healthy' : 'unhealthy',
-      details: issues.length === 0 ? [`All ${getSupportedDiagramFormats().length} formats operational`] : issues
+      details: issues.length === 0 ? [`All ${getSupportedDiagramFormats().length} formats operational (ERD temporarily disabled)`] : issues
     };
   }
 
@@ -270,14 +246,14 @@ export class KrokiRenderingHandler {
           output_format: 'png'
         }
       },
-      {
-        format: 'erd',
-        input: {
-          code: '[User]\n*id {label: "int"}',
-          diagram_format: 'erd',
-          output_format: 'png'
-        }
-      },
+      // {
+      //   format: 'erd',
+      //   input: {
+      //     code: '[User]\n*id {label: "int"}',
+      //     diagram_format: 'erd',
+      //     output_format: 'png'
+      //   }
+      // }, // ERD temporarily disabled
       {
         format: 'bpmn',
         input: {
@@ -452,4 +428,8 @@ export class ProcessingError extends Error {
     this.name = 'ProcessingError';
     this.errorInfo = errorInfo;
   }
-} 
+}
+
+// CACHING DISABLED: Always generate unique file paths with timestamps
+// Each request creates a new file - no caching for reliability and simplicity
+// This ensures predictable behavior where every render_diagram call produces a unique output file

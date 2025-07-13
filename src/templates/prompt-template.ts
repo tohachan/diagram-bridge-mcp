@@ -185,7 +185,7 @@ export class DiagramSelectionPromptTemplate {
           const config = getFormatConfiguration(f);
           return config?.displayName || f;
         }).join(', ')
-      : 'Mermaid, PlantUML, D2, GraphViz, ERD';
+      : 'Mermaid, PlantUML, D2, GraphViz'; // ERD temporarily disabled
 
     return `Choose the best diagram format for this request: "${userRequest}"
 
@@ -196,7 +196,7 @@ Consider:
 - PlantUML: Best for UML diagrams and software architecture
 - D2: Best for system architecture and modern infrastructure
 - GraphViz: Best for complex graphs, dependencies, and hierarchies
-- ERD: Best for database schemas and entity relationships
+// - ERD: Best for database schemas and entity relationships (temporarily disabled)
 
 Recommend the most suitable format with a brief explanation.`;
   }

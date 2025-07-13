@@ -26,7 +26,7 @@ describe('New Diagram Formats Integration', () => {
       expect(config!.enabled).toBe(true);
       
       // Some formats only support SVG, others support both PNG and SVG
-      if (['bpmn', 'excalidraw', 'vega-lite', 'structurizr'].includes(format)) {
+      if (['bpmn', 'excalidraw', 'vega-lite'].includes(format)) {
         expect(config!.supportedOutputs).toEqual(['svg']);
       } else {
         expect(config!.supportedOutputs).toEqual(expect.arrayContaining(['png', 'svg']));
@@ -55,7 +55,7 @@ describe('New Diagram Formats Integration', () => {
 
     test('should have updated getSupportedFormatIds to include new formats', () => {
       const supportedIds = DiagramFormatsFactory.getSupportedFormatIds();
-      expect(supportedIds).toHaveLength(10); // Only main formats, not aliases
+      expect(supportedIds).toHaveLength(12); // Includes main formats and aliases
       
       newFormats.forEach(format => {
         expect(supportedIds).toContain(format);

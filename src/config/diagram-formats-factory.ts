@@ -22,7 +22,7 @@ export class DiagramFormatsFactory {
         plantuml: this.createPlantUMLConfig(),
         d2: this.createD2Config(),
         graphviz: this.createGraphvizConfig(),
-        erd: this.createERDConfig(),
+        // erd: this.createERDConfig(), // DISABLED: ERD format temporarily disabled
         
         // New formats
         bpmn: this.createBPMNConfig(),
@@ -376,7 +376,7 @@ export class DiagramFormatsFactory {
           'Limited to database schemas',
           'Less flexible than general diagramming tools',
           'Specific syntax requirements',
-          'No explicit relationship notation like Mermaid'
+          'Learning curve for proper cardinality notation'
         ],
         bestFor: [
           'Database schema design',
@@ -394,44 +394,50 @@ export class DiagramFormatsFactory {
       },
       instructionTemplate: {
         syntaxGuidelines: [
-          'Define entities: [EntityName]',
-          'Primary keys: *id {label: "int, primary key"}',
-          'Foreign keys: customer_id {label: "int, foreign key"}',
-          'Attributes: name {label: "varchar, not null"}',
-          'Relationships are expressed through foreign key references',
-          'Use meaningful entity and attribute names'
+          'Define entities with brackets: [EntityName]',
+          'Add attributes inside curly braces: { }',
+          'Primary keys with asterisk: *id',
+          'Foreign keys with plus: +user_id',
+          'Regular attributes: attribute_name',
+          'Define relationships: ENTITY1 ||--o{ ENTITY2',
+          'Use cardinality symbols: ||--|| (one-to-one), ||--o{ (one-to-many), }o--o{ (many-to-many)',
+          'Add relationship labels after colon: ENTITY1 ||--o{ ENTITY2 : "relationship"',
+          'Use simple attribute names without type specifications'
         ],
         bestPractices: [
-          'Use clear entity names',
-          'Define all primary keys',
-          'Specify data types for attributes',
-          'Include constraints (not null, unique)',
-          'Use consistent naming conventions',
-          'Express relationships through foreign key attributes'
+          'Use clear, descriptive entity and attribute names',
+          'Define primary keys explicitly with * symbol',
+          'Show relationships with proper cardinality notation',
+          'Include data types and constraints for attributes',
+          'Use consistent naming conventions (snake_case or camelCase)',
+          'Add meaningful relationship descriptions',
+          'Group related entities logically in the diagram'
         ],
         commonPitfalls: [
-          'DO NOT forget primary key definitions',
-          'DO NOT use ambiguous entity names',
-          'DO NOT omit important relationships',
-          'DO NOT ignore data type specifications',
-          'DO NOT use explicit relationship lines - use foreign key references instead'
+          'DO NOT forget to define primary keys',
+          'DO NOT use ambiguous entity or relationship names',
+          'DO NOT use incorrect cardinality symbols',
+          'DO NOT mix different ERD notation styles',
+          'DO NOT ignore important relationships between entities',
+          'DO NOT omit data type specifications for attributes'
         ],
         examplePatterns: [
-          '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}',
-          '[Order]\n*id {label: "int, primary key"}\nuser_id {label: "int, foreign key"}\ncreated_at {label: "timestamp"}',
-          '[Product]\n*id {label: "int, primary key"}\ncategory_id {label: "int, foreign key"}\nname {label: "varchar, not null"}'
+          '[Customer] {\n  *id\n  name\n  email\n}\n\n[Order] {\n  *id\n  +customer_id\n  date\n}\n\nCustomer ||--o{ Order : places',
+          '[User] {\n  *id\n  username\n  email\n}\n\n[Post] {\n  *id\n  +user_id\n  title\n}\n\nUser ||--o{ Post : creates',
+          '[Author] {\n  *id\n  name\n}\n\n[Book] {\n  *id\n  +author_id\n  title\n}\n\nAuthor ||--o{ Book : writes'
         ],
         outputSpecifications: [
           'Output ONLY the ERD code without markdown code blocks',
-          'Include all entities and relationships',
-          'Specify primary and foreign keys',
-          'Include data types and constraints',
-          'Use simple entity definitions with square brackets [EntityName]',
-          'Express relationships through foreign key attributes only'
+          'Start with erDiagram declaration',
+          'Use proper cardinality notation for relationships',
+          'Define entities with attributes using { } syntax when needed',
+          'Include meaningful relationship labels',
+          'Specify primary keys (PK) and unique keys (UK) when applicable',
+          'Use clear entity and relationship definitions'
         ]
       },
       fileExtensions: ['.er', '.erd'],
-      exampleCode: '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}\nemail {label: "varchar, unique"}\n\n[Post]\n*id {label: "int, primary key"}\nuser_id {label: "int, foreign key"}\ntitle {label: "varchar, not null"}\ncontent {label: "text"}'
+      exampleCode: 'erDiagram\n  USER {\n    int id PK\n    string name\n    string email UK\n  }\n  POST {\n    int id PK\n    int user_id FK\n    string title\n    text content\n  }\n  USER ||--o{ POST : creates'
     };
   }
 
@@ -637,7 +643,7 @@ export class DiagramFormatsFactory {
       displayName: 'Structurizr',
       description: 'Structurizr DSL for software architecture diagrams',
       krokiFormat: 'structurizr',
-      supportedOutputs: ['svg'],
+      supportedOutputs: ['png', 'svg'],
       enabled: true,
       characteristics: {
         strengths: [
@@ -709,8 +715,7 @@ export class DiagramFormatsFactory {
           'Include autoLayout in all view definitions with optional direction',
           'Add descriptive titles to views for clarity',
           'Include technology descriptions for all containers and components',
-          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"',
-          'IMPORTANT: Structurizr only supports SVG output format - do not request PNG'
+          'Ensure proper assignment syntax: name = elementType "Label" "Description" "Technology"'
         ]
       },
       fileExtensions: ['.dsl', '.structurizr'],
@@ -727,7 +732,7 @@ export class DiagramFormatsFactory {
       displayName: 'Excalidraw',
       description: 'Hand-drawn style diagrams and sketches',
       krokiFormat: 'excalidraw',
-      supportedOutputs: ['svg'], // Excalidraw only supports SVG output in Kroki
+      supportedOutputs: ['svg'], // Excalidraw only supports SVG output in Kroki (confirmed)
       enabled: true,
       characteristics: {
         strengths: [
@@ -888,12 +893,32 @@ export class DiagramFormatsFactory {
   }
 
   /**
+   * Get instruction template for a format (single source of truth)
+   */
+  static getInstructionTemplate(formatId: string) {
+    const registry = this.createDefaultRegistry();
+    const format = registry.formats[formatId];
+    
+    if (!format) return null;
+    
+    return {
+      format: formatId,
+      displayName: format.displayName,
+      syntaxGuidelines: format.instructionTemplate.syntaxGuidelines,
+      bestPractices: format.instructionTemplate.bestPractices,
+      commonPitfalls: format.instructionTemplate.commonPitfalls,
+      examplePatterns: format.instructionTemplate.examplePatterns,
+      outputSpecifications: format.instructionTemplate.outputSpecifications
+    };
+  }
+
+  /**
    * Get all supported format IDs
    */
   static getSupportedFormatIds(): string[] {
     return [
-      'mermaid', 'plantuml', 'd2', 'graphviz', 'erd',
-      'bpmn', 'c4-plantuml', 'structurizr', 'excalidraw', 'vega-lite'
+      'mermaid', 'plantuml', 'd2', 'graphviz', /* 'erd', */ // ERD temporarily disabled
+      'bpmn', 'c4-plantuml', 'c4plantuml', 'c4', 'structurizr', 'excalidraw', 'vega-lite'
     ];
   }
 

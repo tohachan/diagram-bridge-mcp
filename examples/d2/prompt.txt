@@ -1,0 +1,1 @@
+Choose the best diagram format for showing a microservice-based e-commerce system architecture with services for user management, inventory, and payment, then generate the diagram code and render it to an image file. Save the result as ./diagrams2/ecommerce_microservices_architecture

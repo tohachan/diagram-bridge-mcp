@@ -1,0 +1,1 @@
+Choose the best diagram format for visualizing the user signup and login workflow including states and transitions, then generate the diagram code and render it to an image file. Save the result as user_auth_flow

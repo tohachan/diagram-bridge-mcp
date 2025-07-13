@@ -222,7 +222,7 @@ describe('Diagram Selection System', () => {
   describe('Metrics', () => {
     it('should provide system metrics', async () => {
       const metrics = await handler.getMetrics();
-      expect(metrics.supportedFormats).toBe(10); // All supported formats including new ones
+      expect(metrics.supportedFormats).toBe(12); // All supported formats including new ones and aliases
       expect(metrics.heuristicsCount).toBeGreaterThanOrEqual(0);
       expect(typeof metrics.lastProcessingTime).toBe('number');
     });

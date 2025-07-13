@@ -1,0 +1,1 @@
+Choose the best diagram format for representing the dependency graph of modules in a Node.js application, including packages, modules, and import relationships, then generate the diagram code and render it to an image file. Save the result as nodejs_dependency_graph

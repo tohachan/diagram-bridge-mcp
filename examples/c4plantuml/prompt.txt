@@ -1,0 +1,1 @@
+Choose the best diagram format for defining a workspace with container views for a content management system, including web app, API, and database containers, then generate the diagram code and render it to an image file. Save the result as cms_container_view

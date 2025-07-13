@@ -167,7 +167,7 @@ export class DynamicFormatMapping {
       plantuml: ['.puml', '.plantuml'],
       d2: ['.d2'],
       graphviz: ['.dot', '.gv'],
-      erd: ['.er', '.erd']
+      // erd: ['.er', '.erd'], // ERD temporarily disabled
     };
 
     return extensionMap[format] || [`.${format}`];
@@ -182,7 +182,7 @@ export class DynamicFormatMapping {
       plantuml: '@startuml\nclass User {\n  +name: String\n  +login()\n}\n@enduml',
       d2: 'users -> database: query\ndatabase -> users: results\napi: {\n  shape: rectangle\n  style.fill: lightblue\n}',
       graphviz: 'digraph G {\n  A -> B;\n  B -> C;\n  A -> C;\n}',
-      erd: '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}'
+      // erd: '[User]\n*id {label: "int, primary key"}\nname {label: "varchar, not null"}' // ERD temporarily disabled
     };
 
     return exampleMap[format] || `# ${format} diagram example`;

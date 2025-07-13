@@ -279,6 +279,6 @@ Based on keyword analysis:
 ## Security Considerations
 
 - **Input sanitization**: All inputs are validated and sanitized
-- **Content filtering**: Malicious content detection enabled for user requests
+- **Content filtering**: Malicious content detection enabled
 - **File safety**: Generated files are safely stored with controlled access
 - **Error handling**: Safe error messages without system information leakage

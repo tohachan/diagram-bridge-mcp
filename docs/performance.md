@@ -44,8 +44,8 @@ Key metrics available via MCP resources:
 
 ### Malicious Content Detection
 
-- **User request analysis**: Static analysis of user requests for suspicious patterns (script injection, HTML events)
-- **Format validation**: Ensure diagram code matches expected format syntax
+- **Code analysis**: Static analysis of diagram code for suspicious patterns
+- **Format validation**: Ensure code matches expected format syntax
 - **Resource limits**: Prevent resource exhaustion attacks
 - **Safe error handling**: No system information leakage in error messages
 

@@ -10,7 +10,11 @@ import * as path from 'path';
  * Records all discovered issues in ISSUES.md
  */
 
-describe('Docker Rendering Integration Tests', () => {
+// Skip Docker tests when Docker is not available
+// To run Docker tests: ensure docker-compose is up and set ENABLE_DOCKER_TESTS=true
+const shouldRunDockerTests = process.env.ENABLE_DOCKER_TESTS === 'true';
+
+(shouldRunDockerTests ? describe : describe.skip)('Docker Rendering Integration Tests', () => {
   const krokiClient = new KrokiHttpClient({
     baseUrl: process.env.KROKI_URL || 'http://localhost:8000',
     timeout: 60000, // 60 seconds for Docker tests

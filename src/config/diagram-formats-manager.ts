@@ -255,18 +255,24 @@ export class DiagramFormatsManager {
     // Check registry structure
     if (!this.registry.formats) {
       errors.push('Registry missing formats object');
+      return {
+        isValid: false,
+        errors
+      };
     }
 
     if (!this.registry.defaultFormat) {
       errors.push('Registry missing default format');
     }
 
-    // Check default format exists and is enabled
-    const defaultConfig = this.getFormatConfig(this.registry.defaultFormat);
-    if (!defaultConfig) {
-      errors.push(`Default format '${this.registry.defaultFormat}' not found`);
-    } else if (!defaultConfig.enabled) {
-      errors.push(`Default format '${this.registry.defaultFormat}' is disabled`);
+    // Check default format exists and is enabled (only if formats exist)
+    if (this.registry.defaultFormat) {
+      const defaultConfig = this.getFormatConfig(this.registry.defaultFormat);
+      if (!defaultConfig) {
+        errors.push(`Default format '${this.registry.defaultFormat}' not found`);
+      } else if (!defaultConfig.enabled) {
+        errors.push(`Default format '${this.registry.defaultFormat}' is disabled`);
+      }
     }
 
     // Validate each format configuration

@@ -228,13 +228,15 @@ Recommend the most suitable format with a brief explanation.`;
     }
 
     // Validate available formats are supported
-    const supportedFormats = getSupportedDiagramFormats();
-    const invalidFormats = variables.availableFormats.filter(format => 
-      !supportedFormats.includes(format)
-    );
+    if (Array.isArray(variables.availableFormats)) {
+      const supportedFormats = getSupportedDiagramFormats();
+      const invalidFormats = variables.availableFormats.filter(format => 
+        !supportedFormats.includes(format)
+      );
 
-    if (invalidFormats.length > 0) {
-      errors.push(`Unsupported formats: ${invalidFormats.join(', ')}`);
+      if (invalidFormats.length > 0) {
+        errors.push(`Unsupported formats: ${invalidFormats.join(', ')}`);
+      }
     }
 
     return errors;

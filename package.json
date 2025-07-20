@@ -1,6 +1,6 @@
 {
   "name": "diagram-bridge-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A \"bridge\" MCP server with a unique Prompt+Tool design that helps LLMs seamlessly generate and render diagrams. Powered by Kroki to support dozens of formats.",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",

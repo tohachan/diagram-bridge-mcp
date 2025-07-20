@@ -19,6 +19,9 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine AS production
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S mcp -u 1001
@@ -55,12 +58,12 @@ ENV KROKI_USE_LOCAL=true
 ENV LOG_LEVEL=info
 ENV MAX_CODE_LENGTH=5242880
 
-# Expose port
-EXPOSE 3000
+# Expose port (dynamically based on PORT env var, default 3000)
+EXPOSE ${PORT:-3000}
 
-# Health check
+# Health check - now uses HTTP endpoint when in container
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "process.exit(0)" || exit 1
+  CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
 
 # Start the application
 CMD ["node", "dist/index.js"] 

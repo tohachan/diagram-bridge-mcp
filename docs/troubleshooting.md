@@ -2,6 +2,50 @@
 
 Common issues and solutions for the Diagram Bridge MCP Server.
 
+## Common Deployment Issues ✅
+
+### 🗂️ Files Save Inside Container (SOLVED)
+**Problem**: Generated diagrams aren't visible on local filesystem
+
+**Solution**: Volume mapping is already configured in all Docker Compose files:
+```yaml
+volumes:
+  - "./generated-diagrams:/app/generated-diagrams"
+```
+
+**Verification**:
+```bash
+# Check that files appear locally
+ls -la ./generated-diagrams/
+```
+
+### 🔌 Local Port Configuration (SOLVED)  
+**Problem**: Need to configure ports when running Node.js server locally
+
+**Solution**: Use environment variables:
+```bash
+# Set ports and start
+export PORT=3001
+export KROKI_URL=http://localhost:8000
+node dist/index.js
+```
+
+**MCP Client Configuration**:
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "node",
+      "args": ["/path/to/diagram-bridge-mcp/dist/index.js"],
+      "env": {
+        "PORT": "3001",
+        "KROKI_URL": "http://localhost:8000"
+      }
+    }
+  }
+}
+```
+
 ## Installation Issues
 
 ### Node.js Version Problems

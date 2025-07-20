@@ -35,7 +35,7 @@ services:
     container_name: kroki
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${KROKI_PORT:-8000}:8000"
     environment:
       - KROKI_BLOCKDIAG_HOST=blockdiag
       - KROKI_MERMAID_HOST=mermaid

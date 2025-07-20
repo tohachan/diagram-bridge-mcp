@@ -2,6 +2,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createServer } from 'http';
 import { z } from 'zod';
 import { DiagramSelectionHandler } from './resources/diagram-selection-handler.js';
 import { DiagramInstructionsHandler } from './resources/diagram-instructions-handler.js';
@@ -450,11 +451,110 @@ const SERVER_CONFIG = {
   license: 'MIT'
 };
 
+// HTTP server for health checks and info (when running in Docker)
+function startHttpServer() {
+  const port = parseInt(process.env.PORT || '3000', 10);
+  
+  const httpServer = createServer(async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
+    if (req.url === '/health') {
+      try {
+        const [selectionHealth, instructionsHealth, renderingHealth] = await Promise.all([
+          diagramHandler.healthCheck(),
+          instructionsHandler.healthCheck(),
+          renderingHandler.healthCheck()
+        ]);
+        
+        const overallStatus = [selectionHealth, instructionsHealth, renderingHealth]
+          .every(h => h.status === 'healthy') ? 'healthy' : 'unhealthy';
+        
+        const healthData = {
+          status: overallStatus,
+          timestamp: new Date().toISOString(),
+          version: SERVER_CONFIG.version,
+          services: {
+            diagram_selection: selectionHealth,
+            diagram_instructions: instructionsHealth,
+            diagram_rendering: renderingHealth
+          }
+        };
+        
+        res.statusCode = overallStatus === 'healthy' ? 200 : 503;
+        res.end(JSON.stringify(healthData, null, 2));
+      } catch (error) {
+        res.statusCode = 500;
+        res.end(JSON.stringify({ 
+          status: 'error', 
+          message: 'Health check failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }, null, 2));
+      }
+    } else if (req.url === '/info' || req.url === '/') {
+      const info = {
+        name: SERVER_CONFIG.name,
+        version: SERVER_CONFIG.version,
+        description: SERVER_CONFIG.description,
+        author: SERVER_CONFIG.author,
+        license: SERVER_CONFIG.license,
+        type: 'Model Context Protocol (MCP) Server',
+        transport: 'STDIO',
+        tools: [
+          'help_choose_diagram',
+          'get_diagram_instructions', 
+          'render_diagram'
+        ],
+        resources: [
+          'diagram_selection_health',
+          'diagram_selection_metrics',
+          'diagram_format_catalog',
+          'diagram_instructions_health',
+          'diagram_instructions_metrics',
+          'diagram_rendering_health',
+          'diagram_rendering_metrics'
+        ],
+        endpoints: {
+          health: '/health',
+          info: '/info'
+        }
+      };
+      
+      res.statusCode = 200;
+      res.end(JSON.stringify(info, null, 2));
+    } else {
+      res.statusCode = 404;
+      res.end(JSON.stringify({ 
+        error: 'Not Found',
+        message: 'Available endpoints: /health, /info',
+        available_endpoints: ['/health', '/info', '/']
+      }, null, 2));
+    }
+  });
+  
+  httpServer.listen(port, '0.0.0.0', () => {
+    console.error(`HTTP server listening on port ${port}`);
+    console.error(`Health check: http://localhost:${port}/health`);
+    console.error(`Server info: http://localhost:${port}/info`);
+  });
+  
+  return httpServer;
+}
+
+// Global reference for HTTP server (for graceful shutdown)
+let globalHttpServer: ReturnType<typeof createServer> | null = null;
+
 // Start the server
 async function main() {
   console.error(`Starting ${SERVER_CONFIG.name} v${SERVER_CONFIG.version}`);
   console.error(`Description: ${SERVER_CONFIG.description}`);
   console.error('');
+  
+  // Start HTTP server if running in Docker container
+  if (process.env.DOCKER_CONTAINER === 'true') {
+    console.error('Running in Docker container - starting HTTP server for health checks...');
+    globalHttpServer = startHttpServer();
+  }
   
   // Perform initial health checks
   try {
@@ -509,12 +609,18 @@ async function main() {
 process.on('SIGINT', async () => {
   console.error('\nShutting down MCP server...');
   await server.close();
+  if (globalHttpServer) {
+    globalHttpServer.close();
+  }
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.error('\nShutting down MCP server...');
   await server.close();
+  if (globalHttpServer) {
+    globalHttpServer.close();
+  }
   process.exit(0);
 });
 

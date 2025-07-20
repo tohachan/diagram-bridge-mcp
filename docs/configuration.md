@@ -83,6 +83,70 @@ Higher limits may impact:
 - Use health checks to verify service availability
 - Test with progressively larger diagrams to find optimal limits
 
+## Local Development Setup
+
+### Running without Docker
+
+For local development or when you prefer not to use Docker:
+
+```bash
+# 1. Build the project
+npm install
+npm run build
+
+# 2. Start Kroki service (required)
+docker run -d -p 8000:8000 yuzutech/kroki
+
+# 3. Configure environment
+export PORT=3001
+export KROKI_URL=http://localhost:8000
+export GENERATED_DIAGRAMS_DIR=./generated-diagrams
+
+# 4. Start MCP server
+node dist/index.js
+```
+
+### Port Configuration for Local Setup
+
+When running locally, you can configure ports using environment variables:
+
+```bash
+# Set custom ports
+export PORT=3001                    # MCP server port
+export KROKI_URL=http://localhost:8001  # If using custom Kroki port
+
+# Start server
+node dist/index.js
+```
+
+### MCP Client Configuration for Local Setup
+
+Update your MCP client configuration to use the local server:
+
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "node",
+      "args": ["/path/to/diagram-bridge-mcp/dist/index.js"],
+      "env": {
+        "PORT": "3001",
+        "KROKI_URL": "http://localhost:8000"
+      }
+    }
+  }
+}
+```
+
+### Health Monitoring
+
+When running locally with `DOCKER_CONTAINER=true`, the server provides HTTP endpoints:
+
+- `http://localhost:PORT/health` - Health check
+- `http://localhost:PORT/info` - Server information
+
+**Note**: These endpoints are for monitoring only. MCP protocol uses STDIO communication.
+
 ## Storage Configuration
 
 ### Default Behavior
@@ -111,6 +175,63 @@ npm start
       "env": {
         "DIAGRAM_STORAGE_PATH": "/Users/you/Documents/diagrams"
       }
+    }
+  }
+}
+```
+
+## MCP vs HTTP Protocols
+
+**Important**: The server uses two different protocols for different purposes:
+
+| Protocol | Purpose | Configuration |
+|----------|---------|---------------|
+| **MCP (STDIO)** | Tool communication with LLM clients | Configure in MCP client settings |
+| **HTTP** | Docker health monitoring only | Automatic when `DOCKER_CONTAINER=true` |
+
+### MCP Protocol (Main Interface)
+- **Used by**: Cursor IDE, Claude Desktop, VS Code MCP extension
+- **Communication**: STDIO (Standard Input/Output)
+- **Port**: Not applicable (no network port used)
+- **Configuration**: Via MCP client settings
+
+### HTTP Endpoints (Monitoring Only)
+- **Used for**: Docker health checks, monitoring, debugging
+- **Available at**: `http://localhost:PORT/health` and `http://localhost:PORT/info`
+- **When active**: Only when running in Docker container
+- **Not for**: MCP client connections
+
+## MCP Client Configuration
+
+### Cursor IDE Setup
+
+**Option 1: Local Installation**
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "node",
+      "args": ["/absolute/path/to/diagram-bridge-mcp/dist/index.js"],
+      "enabled": true
+    }
+  }
+}
+```
+
+**Option 2: Docker Container (Recommended)**
+```bash
+# First start the container
+docker-compose up -d
+
+# Then configure Cursor
+```
+```json
+{
+  "mcpServers": {
+    "diagram-bridge": {
+      "command": "docker",
+      "args": ["exec", "-i", "diagram-bridge-mcp", "node", "dist/index.js"],
+      "enabled": true
     }
   }
 }

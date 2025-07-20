@@ -423,9 +423,13 @@ export class KrokiHttpClient implements KrokiClient {
    * Check if URL points to local Kroki service
    */
   private isLocalUrl(url: string): boolean {
-    return url.includes('kroki:8000') || 
-           url.includes('localhost:8000') || 
-           url.includes('127.0.0.1:8000') ||
-           url.includes('0.0.0.0:8000');
+    // Check for Docker internal network (kroki:8000)
+    if (url.includes('kroki:8000')) {
+      return true;
+    }
+    
+    // Check for localhost with any port (8000, 9000, etc.)
+    const localhostPattern = /localhost:\d+|127\.0\.0\.1:\d+|0\.0\.0\.0:\d+/;
+    return localhostPattern.test(url);
   }
 }
